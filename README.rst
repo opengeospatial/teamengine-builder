@@ -13,6 +13,10 @@ Launch Instance::
 
 	https://us-west-2.console.aws.amazon.com/ec2/v2/home?region=us-west-2#LaunchInstanceWizard:
 
+Select a free tier eligible::
+
+	Ubuntu Server 14.04 LTS (HVM), SSD Volume Type		
+
 Review and Launch
 
 Update security Settings. Security Group should have::
