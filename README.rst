@@ -1,7 +1,7 @@
 Introduction
 -------------
 
-This repository provides easy to use scripts to install, from scratch and configure `TEAMEngine <https://github.com/opengeospatial/teamengine>`_ in an Ubuntu machine in the Amazon Cloud. 
+This repository provides easy to use scripts to install, from scratch and configure `TEAM Engine <https://github.com/opengeospatial/teamengine>`_ in an Ubuntu machine in the Amazon Cloud. 
 
 
 Setup Amazon Instance
