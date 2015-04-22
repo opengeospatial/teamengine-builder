@@ -20,7 +20,7 @@
 #
 #  The following values are required:
 #  - te_git_url: git url of the repository. You can use the remote one or a local one (e.g. 
-#    used for fast testing new features).
+#    used for fast testing new features). Locally for example: file:///Users/user/github/teamengine
 #  - te_tag: tag or branch to be tested
 #  - folder_to_build: local directory where teamengine and catalina_base will be installed
 #  - tomcat: path to the local installation of tomcat
@@ -39,6 +39,7 @@
 #done  
 
 # ./build-te -a 4.1.0b -t /home/ubuntu/apache-tomcat-7.0.52
+# /Applications/apache-tomcat-7.0.57
 
 while [ "$1" != "" ]; do
   key="$1"
@@ -60,6 +61,11 @@ while [ "$1" != "" ]; do
       war="$2"
       shift
       ;;
+      -g|--git-url)
+      te_git_url="$2"
+      shift
+      ;;
+      
       
       
   esac
@@ -114,15 +120,17 @@ else
   war=teamengine
 fi   
 
+if [ $te_git_url ];
+then
+    echo "Using git url name: " $te_git_url
+else
+    echo  "Since the git url  was not provide, 'https://github.com/opengeospatial/teamengine/' will be used"
+    te_git_url=https://github.com/opengeospatial/teamengine/
+fi  
+
 dir=$(pwd)
 
-## Provide the URL of the TEAM Engine git repository
-te_git_url=https://github.com/opengeospatial/teamengine/
-## e.g. local git
-#te_git_url=file:///Users/lbermudez/Documents/Dropbox/github/teamengine
 
-
-## folder to build teamengine
 
  
 
@@ -166,7 +174,7 @@ echo "dir created " $folder_to_build
 ## download TE 
 echo "downloading and installing TE"
 cd $folder_to_build
-git clone $te_git_url teamengine
+git clone $te_git_url
 
 
 cd $folder_to_build/teamengine 
