@@ -90,7 +90,11 @@ Run te-build::
 
 	./build_te.sh -a 4.1.0b -t /home/ubuntu/apache-tomcat-7.0.52	
 
+Go to the `EC2 Management console <https://us-west-2.console.aws.amazon.com/ec2/v2/home?region=us-west-2#Instances:sort=instanceState>`_ and get the public IP of your amazaon instance, for example: http://54.201.134.109, 
 
+Go to teamengine web interface, typing for example http://54.201.134.109/teamengine::
+
+	http://YourIP/teamengine
 
 
 Optional if not building in Ubuntu
