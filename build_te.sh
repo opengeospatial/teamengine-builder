@@ -1,45 +1,29 @@
 #!/bin/sh
 
-#   This script (for UNIX) builds teamengine from scratch. It automates most of the work require to build:
-#     - TEAM Engine
-#     - TE_BASE
-#     - catalina_base
-#
-#  It receives 2 parameters:
-#  1. the tag (or branch) to build and 
-#  2. the base folder where TE will be downloaded and installed
-#
-#  At the end of the script there is an option to start tomcat automatically. You need to        
-#     remove an exit command. Use with caution. 
-#
-#   Requirements:
-#     - git (1.9.4)
-#     - mvn (3.2)
-#     - Java (1.7 or more)
-#     - local installation of tomcat (7.X)
-#
-#  The following values are required:
-#  - te_git_url: git url of the repository. You can use the remote one or a local one (e.g. 
-#    used for fast testing new features). Locally for example: file:///Users/user/github/teamengine
-#  - te_tag: tag or branch to be tested
-#  - folder_to_build: local directory where teamengine and catalina_base will be installed
-#  - tomcat: path to the local installation of tomcat
-#  - folder_site: Optional: Additionally you can provide a folder that has the body, 
-#    header and footer information for the Welcome Page. An example is available at     
-#    teamengine/teamengine-console/src/main/resources/site
-#
-#  More information about how to build and customize TEAM Engine here: 
-#  https://github.com/opengeospatial/teamengine/
+if [ "$1" == "-h" -o "$1" == "--help" ]; then
 
+  echo ""
+  echo "Usage build_te -t tomcat [-options] "
+  echo ""
+  echo "where:"
+  echo "  tomcat                    is the path to tomcat, e.g. /home/ubuntu/apache-tomcat-7.0.52"
+  echo ""
+  echo "where pptions include:"
+  echo "  -g (or --git-url)         URL to a git repository (local or external) for the  TEAM Engine source"
+  echo "                            for example: https://github.com/opengeospatial/teamengine.git"
+  echo "  -a (or --tag-or-branch)   to build a specific tag or branch"
+  echo "  -b (or --base-folder)     local path where teamengine will be build from scratch."
+  echo "                            If not given ~/te-build will be used."
+  echo "  -w (or --war)             local path where teamengine will be build from scratch."
+  echo "                            If not given teamengine will be used"
+  echo "  -s (or --start)           if provided it will attempt to stop a tomcat a process and start it again
+  echo " Example:"
+  echo "    ./build_te.sh -t /Applications/apache-tomcat-7.0.57 -a 4.1.0b -w super-testing-server"
+  echo ""
+  echo "more information about TEAM Engine at https://github.com/opengeospatial/teamengine/  "
+exit 0
 
-#while [ "$1" != "" ]; do
-#  echo $1
-#  shift
-
-#done  
-
-# ./build-te -a 4.1.0b -t /home/ubuntu/apache-tomcat-7.0.52
-# /Applications/apache-tomcat-7.0.57
+fi 
 
 while [ "$1" != "" ]; do
   key="$1"
@@ -65,10 +49,11 @@ while [ "$1" != "" ]; do
       te_git_url="$2"
       shift
       ;;
-      -s|--simple)
-      simple="$2"
+      -s|--start)
+      start="true"
       shift
       ;;
+
       
       
       
@@ -128,8 +113,8 @@ if [ $te_git_url ];
 then
     echo "Using git url name: " $te_git_url
 else
-    echo  "Since the git url  was not provide, 'https://github.com/opengeospatial/teamengine/' will be used"
-    te_git_url=https://github.com/opengeospatial/teamengine/
+    echo  "Since the git url  was not provide, 'https://github.com/opengeospatial/teamengine.git' will be used"
+    te_git_url=https://github.com/opengeospatial/teamengine.git
 fi  
 
 dir=$(pwd)
@@ -153,7 +138,7 @@ user_temp_folder=$dir/users
 
 ##----------------------------------------------------------##
 
-# Define more variable
+# Define more variables
 catalina_base=$folder_to_build/catalina_base 
 war_name=$war
 #repo_te=$folder_to_build/build
@@ -285,16 +270,17 @@ echo 'to stop run: '$catalina_base'/bin/catalina.sh stop'
 
 ## If you want the script to start catalina, remove (or comment) the exit command with caution. It will stop any tomcat process and will start catalina_base where teamengine.war was installed.
 
-## Stops TE if running
-pid=$(ps axuw | grep tomcat | grep -v grep |  awk '{print $2}')
-if [ "${pid}" ]; then
-  eval "kill ${pid}"
+if $start ; then
+  ## Stops TE if running
+  pid=$(ps axuw | grep tomcat | grep -v grep |  awk '{print $2}')
+  if [ "${pid}" ]; then
+    eval "kill ${pid}"
+  fi
+
+  sleep 3
+
+
+  #starts teamengine
+  $catalina_base/bin/catalina.sh start   
 fi
-
-sleep 3
-
-
-#starts teamengine
-$catalina_base/bin/catalina.sh start   
-
 
