@@ -65,6 +65,10 @@ while [ "$1" != "" ]; do
       te_git_url="$2"
       shift
       ;;
+      -s|--simple)
+      simple="$2"
+      shift
+      ;;
       
       
       
@@ -181,7 +185,7 @@ cd $folder_to_build/teamengine
 tags=$(git tag)
 
 if echo "$tags" | grep -q "$te_tag"; then
-    echo "Tag $te_tag found";
+    echo "Tag $te_tag found, trying a branch";
 else
   echo "Tag $te_tag not found";
   echo "looking for branches"
@@ -229,7 +233,7 @@ echo "moving war to catalina_base"
 cp $folder_to_build/teamengine/teamengine-web/target/teamengine.war $catalina_base/webapps/$war_name.war
 
 echo "unzipping  common libs in $catalina_base/lib "
-unzip -o $folder_to_build/teamengine/teamengine-web/target/teamengine-common-libs.zip -d $catalina_base/lib 
+unzip -q -o $folder_to_build/teamengine/teamengine-web/target/teamengine-common-libs.zip -d $catalina_base/lib
 
 echo "building TE_BASE"
 
@@ -239,12 +243,24 @@ export TE_BASE=$catalina_base/TE_BASE
 ## get the file that has base zip and copy it to TE_BASE
 cd $folder_to_build/teamengine/teamengine-console/target/
 base_zip=$(ls *base.zip | grep -m 1 "base")
-unzip -o $folder_to_build/teamengine/teamengine-console/target/$base_zip -d $TE_BASE
+unzip -q -o $folder_to_build/teamengine/teamengine-console/target/$base_zip -d $TE_BASE
 
-## copy sample of users
+echo "copying sample of users"
 cp -rf $user_temp_folder/ $TE_BASE/users
 
-## create setenv with environmental variables, change the MaxPermSize if needed
+echo "updating $TE_BASE/resources/site" 
+# The folder_site contains body, header and footer to customize TE.
+if [ -d "$folder_site" ];then
+
+  rm -r $TE_BASE/resources/site
+  cp -rf $folder_site $TE_BASE/resources/site
+  
+ else
+  echo "the following folder for site was not found: '$folder_site'. site was not updated"
+fi
+
+
+echo 'creating setenv with environmental variables'
 cd $catalina_base/bin
 touch setenv.sh
 cat <<EOF >setenv.sh
@@ -259,17 +275,7 @@ EOF
 
 chmod 777 *.sh
 
-#echo "updating site" - not working
-## The folder_site contains body, header and footer to customize TE.
-#if [ -d "$folder_site" ];then
-#
-#   echo "moving to resources"
-#   rm -r $TE_BASE/resources/site
-#   cp -r $folder_site $TE_BASE/resources/site
-#  
-# else
-#  echo "the following folder_site was not found: '$folder_site'"
-#fi
+
 
 
 echo "catalina_base was built at" $catalina_base 
