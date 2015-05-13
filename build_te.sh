@@ -1,6 +1,7 @@
 #!/bin/sh
 
-if [ "$1" == "-h" -o "$1" == "--help" ]; then
+echo "" 
+printHelp(){
 
   echo ""
   echo "Usage build_te -t tomcat [-options] "
@@ -8,20 +9,45 @@ if [ "$1" == "-h" -o "$1" == "--help" ]; then
   echo "where:"
   echo "  tomcat                    is the path to tomcat, e.g. /home/ubuntu/apache-tomcat-7.0.52"
   echo ""
-  echo "where pptions include:"
+  echo "where options include:"
   echo "  -g (or --git-url)         URL to a git repository (local or external) for the  TEAM Engine source"
   echo "                            for example: https://github.com/opengeospatial/teamengine.git"
+  echo "                            if not provided this will be used; https://github.com/opengeospatial/teamengine.git"
+  echo ""
   echo "  -a (or --tag-or-branch)   to build a specific tag or branch"
+  echo "                            if not provided master will be used"
+  echo ""
   echo "  -b (or --base-folder)     local path where teamengine will be build from scratch."
-  echo "                            If not given ~/te-build will be used."
+  echo "                            if not given ~/te-build will be used."
+  echo ""
   echo "  -w (or --war)             local path where teamengine will be build from scratch."
   echo "                            If not given teamengine will be used"
-  echo "  -s (or --start)           if provided it will attempt to stop a tomcat a process and start it again
-  echo " Example:"
-  echo "    ./build_te.sh -t /Applications/apache-tomcat-7.0.57 -a 4.1.0b -w super-testing-server"
   echo ""
+  echo "  -s (or --start)           if 'true' it will attempt to stop a tomcat a process and start it again"
+  echo ""
+  echo "  -d (or --dev)             use to run in development mode. Provide the folder (local path) to build"
+  echo "                            if also provide -g and -a parameters, they will not be used"
+  echo "                            It will build from the source at the local path, no 'git pull' is issued"
+  echo ""
+  echo "  -f (or -folder_site)      if provided, it will build with this costume site folder, if not it will"
+  echo "                            use a folder 'site' located in the same directory of this script"
+  echo ""
+  echo " Examples:"
+  echo "    ./build_te.sh -t /Applications/apache-tomcat-7.0.57 "
+  echo "    ./build_te.sh -t /Applications/apache-tomcat-7.0.57 -a 4.1.0b -w /temp/te"
+  echo "    ./build_te.sh -t /Applications/apache-tomcat-7.0.57 "
+  echo "    ./build_te.sh -t /Applications/apache-tomcat-7.0.57 -d /Users/mike/git/teamengine/ -s true"
+  echo "" 
   echo "more information about TEAM Engine at https://github.com/opengeospatial/teamengine/  "
+  echo "more information about this builder at https://github.com/opengeospatial/teamengine-builder/ "
+  echo "" 
 exit 0
+
+}
+
+if [ "$1" == "-h" -o "$1" == "--help" ]; then
+  printHelp
+ 
 
 fi 
 
@@ -50,7 +76,15 @@ while [ "$1" != "" ]; do
       shift
       ;;
       -s|--start)
-      start="true"
+      start="$2"
+      shift
+      ;;
+      -d|--dev)
+      dev="$2"
+      shift
+      ;;
+      -f|--folder_site)
+      folder_site="$2"
       shift
       ;;
 
@@ -60,6 +94,19 @@ while [ "$1" != "" ]; do
   esac
   shift
 done    
+
+if [ $tomcat_base -a -d $tomcat_base ];
+then
+  echo "Using tomcat: " $tomcat_base
+else
+  echo "Please provide a correct tomcat location, e.g. /home/ubuntu/apache-tomcat-7.0.52." 
+  echo "This is a mandatory parameter"
+  echo ""
+  printHelp
+  
+fi
+
+
 
 # If a a specific tag or branch is not given then the master will be built
 
@@ -93,13 +140,7 @@ else
 fi
 echo "Using Base folder: $base_folder" 
 
-if [ $tomcat_base -a -d $tomcat_base ];
-then
-  echo "Using tomcat: " $tomcat_base
-else
-  echo "Please provide a correct tomcat location, e.g. /home/ubuntu/apache-tomcat-7.0.52"
-  exit
-fi   
+   
 
 if [ $war ];
 then
@@ -117,6 +158,23 @@ else
     te_git_url=https://github.com/opengeospatial/teamengine.git
 fi  
 
+if $start ; then
+    if [ "$start" = "true" ]; then
+    echo "tomcat will start after installing $start"
+    fi
+else
+  $start="false"    
+fi    
+
+
+## optional: contains body, header and footer for the welcome page
+if [ $folder_site ];
+then
+  echo "The folder to be used to create custom site content is : " $folder_site 
+else
+  folder_site=$dir/site
+fi
+
 dir=$(pwd)
 
 
@@ -127,9 +185,6 @@ folder_to_build=$base_folder
 
 ## location of tomcat
 tomcat=$tomcat_base
-
-## optional: contains body, header and footer for the welcome page
-folder_site=$dir/site
 
 ## Contains example of a user: ogctest, ogctest
 user_temp_folder=$dir/users
@@ -158,40 +213,55 @@ fi
 mkdir $folder_to_build
 echo "dir created " $folder_to_build
 
-
-
-## download TE 
-echo "downloading and installing TE"
+echo "installing TE"
 cd $folder_to_build
-git clone $te_git_url
+# if dev is not given
+if [ -z  $dev ] ; then
+
+  ## download TE 
+
+  git clone $te_git_url
 
 
-cd $folder_to_build/teamengine 
-tags=$(git tag)
+  cd $folder_to_build/teamengine 
+  tags=$(git tag)
 
-if echo "$tags" | grep -q "$te_tag"; then
-    echo "Tag $te_tag found, trying a branch";
+  if echo "$tags" | grep -q "$te_tag"; then
+      echo "Tag $te_tag found, trying a branch";
+  else
+    echo "Tag $te_tag not found";
+    echo "looking for branches"
+    branches=$(git branch -a)
+    if echo "$branches" | grep -q "$te_tag"; then
+      echo "found branch"
+     else 
+      echo "Branch $te_tag not found";
+        exit
+     fi   
+  fi
+
+  git checkout $te_tag
+  echo "TE branch is: " $te_tag
+  echo "Building using Maven in quite mode (1-2 min)"
+  mvn -q clean package -DskipTests=true
+  
+
 else
-  echo "Tag $te_tag not found";
-  echo "looking for branches"
-  branches=$(git branch -a)
-  if echo "$branches" | grep -q "$te_tag"; then
-    echo "found branch"
-   else 
-    echo "Branch $te_tag not found";
-      exit
-   fi   
-fi
+  echo "in development mode - building from local folder"
+  if [ -d $dev ]; then
+    echo "copying from  $dev to $folder_to_build"
+    cp -rf $dev $folder_to_build/teamengine
+    cd $folder_to_build/teamengine
+    mvn -q clean install -DskipTests=true
+    
+  else
+    echo "$dev doesn't seems to be a local folder. It should for example /users/home/.."  
+    
+  fi  
+fi  
 
 
-
-
-git checkout $te_tag
-echo "TE branch is: " $te_tag
-echo "Building using Maven in quite mode (1-2 min)"
-mvn -q package -DskipTests=true
-
-echo "----- TE has been downloaded and built successfully"
+echo "----- TE has been installed and built successfully"
 echo " "
 
 
@@ -250,17 +320,20 @@ cd $catalina_base/bin
 touch setenv.sh
 cat <<EOF >setenv.sh
 #!/bin/sh
-## path to tomcat installation to use
+## This file creates requeried environmental variables 
+## to properly run teamengine in tomcat
+
+## path to tomcat 
 export CATALINA_HOME=$tomcat
 
-## path to server instance to use
+## path to server instance 
 export CATALINA_BASE=$catalina_base
-export CATALINA_OPTS='-server -Xmx1024m -XX:MaxPermSize=128m -DTE_BASE=$TE_BASE'
+
+## catalina options
+export CATALINA_OPTS='-server -Xmx1024m -XX:MaxPermSize=128m -DTE_BASE=$TE_BASE -Dderby.system.home=$catalina_base/derby_data'
 EOF
 
 chmod 777 *.sh
-
-
 
 
 echo "catalina_base was built at" $catalina_base 
@@ -270,17 +343,28 @@ echo 'to stop run: '$catalina_base'/bin/catalina.sh stop'
 
 ## If you want the script to start catalina, remove (or comment) the exit command with caution. It will stop any tomcat process and will start catalina_base where teamengine.war was installed.
 
-if $start ; then
-  ## Stops TE if running
-  pid=$(ps axuw | grep tomcat | grep -v grep |  awk '{print $2}')
-  if [ "${pid}" ]; then
-    eval "kill ${pid}"
-  fi
 
+if [ "$start" = "true" ]; then
+  echo "starting tomcat but first - check running tomcat processes.."
+  # gets the first process found "
+#  pid=$(ps axuw | grep tomcat | grep -v grep |  awk 'END{print $2'})
+  pid=$(ps axuw | grep tomcat | grep -v grep)
+  echo "pid is $pid"
+  pidn=$(ps axuw | grep tomcat | grep -v grep | wc -l)
+  echo " "
+  echo "number or processes: $pidn"
+  if [ $pidn -gt 1 ]; then
+    pidlast=$(ps axuw | grep tomcat | grep -v grep | awk 'END{print $2'})
+    kill -9 $pidlast
+    echo "process $pidlast was terminated"
+
+  else
+    echo "Tomcat processes not found"
+  fi  
+  
   sleep 3
 
-
-  #starts teamengine
+  echo "... starting tomcat ... "  
   $catalina_base/bin/catalina.sh start   
 fi
 
