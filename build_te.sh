@@ -1,6 +1,7 @@
 #!/bin/sh
 
 echo "" 
+dir=$(pwd)
 printHelp(){
 
   echo ""
@@ -95,12 +96,16 @@ while [ "$1" != "" ]; do
   shift
 done    
 
-if [ $tomcat_base -a -d $tomcat_base ];
+if [ -d $tomcat_base ];
 then
-  echo "Using tomcat: " $tomcat_base
+  if [ -f $tomcat_base/bin/catalina.sh ]; then
+  echo "[INFO] Using tomcat: " $tomcat_base
+  else
+      echo "[FAIL] Please provide a correct tomcat location, e.g. /home/ubuntu/apache-tomcat-7.0.52." 
+      printHelp
+  fi
 else
-  echo "Please provide a correct tomcat location, e.g. /home/ubuntu/apache-tomcat-7.0.52." 
-  echo "This is a mandatory parameter"
+  echo "[FAIL] Please provide a correct tomcat location, e.g. /home/ubuntu/apache-tomcat-7.0.52." 
   echo ""
   printHelp
   
@@ -112,25 +117,24 @@ fi
 
 if [ $te_tag ];
 then
-  echo "Building " $te_tag
+  echo "[INFO] Building " $te_tag
 else
-  echo "Did not provide te_tag, it should be the first parameter, building master"
+  echo "[INFO] Did not provide a tag to build 'te_tag', so building master"
   te_tag="master"
 fi    
 
 if [ $base_folder ];
 then   
   if [ -d $base_folder ]; then
-    echo "Building in base folder: " $base_folder. "Note that the folder will be re-created"
+    echo "[INFO] Building in a fresh base folder: " $base_folder
 
     else
-      echo "Base folder was not found. For example, provide a base folder like this: -b ~/te-build"
-      exit
-  fi 
-else
-  echo "Since the base folder was not provided it will be build in the user's directory '~/te-build'"
- 
+      echo "[INFO] Base folder '$base_folder ' was not found, so it will be created"
+      mkdir $base_folder
+    fi 
 
+else
+  echo "[INFO] Base folder was not provided, so it will be build in the user's directory '~/te-build'"
   if [ ! -d  ~/te-build ]; then
    mkdir -p ~/te-build
   fi  
@@ -138,29 +142,28 @@ else
 
 
 fi
-echo "Using Base folder: $base_folder" 
+echo "[INFO] Using Base folder: $base_folder" 
 
-   
 
 if [ $war ];
 then
-  echo "Using war name: " $war
+  echo "[INFO] Using war name: " $war
 else
-  echo "Since the war name was not provide, 'teamengine' will be used"
+  echo "[INFO] War name was not provide, so 'teamengine' will be used"
   war=teamengine
 fi   
 
 if [ $te_git_url ];
 then
-    echo "Using git url name: " $te_git_url
+    echo "[INFO] Using git url: " $te_git_url
 else
-    echo  "Since the git url  was not provide, 'https://github.com/opengeospatial/teamengine.git' will be used"
+    echo  "[INFO] The git url  was not provide,  so 'https://github.com/opengeospatial/teamengine.git' will be used"
     te_git_url=https://github.com/opengeospatial/teamengine.git
 fi  
 
 if $start ; then
     if [ "$start" = "true" ]; then
-    echo "tomcat will start after installing $start"
+    echo "[INFO] tomcat will start after installing $start"
     fi
 else
   $start="false"    
@@ -170,14 +173,12 @@ fi
 ## optional: contains body, header and footer for the welcome page
 if [ $folder_site ];
 then
-  echo "The folder to be used to create custom site content is : " $folder_site 
+  echo "[INFO] The folder to be used to create custom site content is : " $folder_site 
 else
+
   folder_site=$dir/site
+  echo "[INFO] The folder site not provided, so $folder_site will be used: " 
 fi
-
-dir=$(pwd)
-
-
 
  
 
@@ -194,10 +195,9 @@ user_temp_folder=$dir/users
 ##----------------------------------------------------------##
 
 # Define more variables
-catalina_base=$folder_to_build/catalina_base 
+
 war_name=$war
 #repo_te=$folder_to_build/build
-
 
 
 
@@ -205,71 +205,88 @@ war_name=$war
 ##  clean 
 if [ -d $folder_to_build ]; 
 then
-  echo "backing up $folder_to_build "
   mv -f $folder_to_build $folder_to_build.bak
   rm -rf $folder_to_build
+  mkdir $folder_to_build
 fi  
 
-mkdir $folder_to_build
-echo "dir created " $folder_to_build
 
-echo "installing TE"
+
+
+echo "[INFO] Installing TEAM Engine "
 cd $folder_to_build
 # if dev is not given
 if [ -z  $dev ] ; then
 
   ## download TE 
 
-  git clone $te_git_url
+  mss=$(git clone $te_git_url)
+  if echo "$mss" | grep "fatal" ;
+  then
+    err="[FAIL] - Repository doesn't exist: $te_git_url"
+    echo "$err"
+    exit 0
+
+  fi  
 
 
   cd $folder_to_build/teamengine 
   tags=$(git tag)
 
   if echo "$tags" | grep -q "$te_tag"; then
-      echo "Tag $te_tag found, trying a branch";
+      found="tag"
   else
-    echo "Tag $te_tag not found";
-    echo "looking for branches"
+    echo "Tag $te_tag not found, so looking for branches"
     branches=$(git branch -a)
     if echo "$branches" | grep -q "$te_tag"; then
-      echo "found branch"
+      found="branch"
      else 
-      echo "Branch $te_tag not found";
+      echo "[FAIL] Branch or Tag $te_tag not found";
         exit
      fi   
   fi
 
-  git checkout $te_tag
-  echo "TE branch is: " $te_tag
-  echo "Building using Maven in quite mode (1-2 min)"
+  echo "[INFO] Checking out: $te_tag $found"
+  git checkout $te_tag 
+  
+  echo "[INFO] Building using Maven in quite mode (1-2 min)"
   mvn -q clean package -DskipTests=true
   
 
 else
-  echo "in development mode - building from local folder"
+  echo "[INFO] Running development mode - building from local folder"
   if [ -d $dev ]; then
-    echo "copying from  $dev to $folder_to_build"
+    echo "[INFO] copying from  $dev to $folder_to_build"
     cp -rf $dev $folder_to_build/teamengine
     cd $folder_to_build/teamengine
     mvn -q clean install -DskipTests=true
     
   else
-    echo "$dev doesn't seems to be a local folder. It should for example /users/home/.."  
+    echo "[FAIL] $dev doesn't seems to be a local folder. It should for example /users/home/.."  
+    exit
     
   fi  
 fi  
 
 
-echo "----- TE has been installed and built successfully"
+echo "[SUCCESS] TE has been installed and built successfully"
 echo " "
+echo "[INFO] Build catalina_base "
 
 
 cd $folder_to_build
 
-echo "clean, create and populate catalina base" 
-rm -rf $catalina_base
+
+catalina_base=$folder_to_build/catalina_base 
+
+
+if [ -d $catalina_base ]; then
+  rm -rf $catalina_base
+fi  
+
 mkdir -p $catalina_base
+echo "[INFO] clean, create and populate catalina base in $catalina_base" 
+
 cd $catalina_base
 mkdir bin logs temp webapps work lib
 
@@ -277,20 +294,19 @@ mkdir bin logs temp webapps work lib
 cp $tomcat/bin/catalina.sh bin/
 cp -r $tomcat/conf $catalina_base
 
-echo "copying war: $war_name in $catalina_base/webapps/"
+echo "[INFO] copying war: $war_name in $catalina_base/webapps/"
 ## move tomcat to catalina_base
 
 #echo "updating war file with custom source" - not working
 #jar -uvf $folder_to_build/teamengine/teamengine-web/target/teamengine.war $folder_site
 
-echo "moving war to catalina_base"
 
 cp $folder_to_build/teamengine/teamengine-web/target/teamengine.war $catalina_base/webapps/$war_name.war
 
-echo "unzipping  common libs in $catalina_base/lib "
+echo "[INFO] unzipping  common libs in $catalina_base/lib "
 unzip -q -o $folder_to_build/teamengine/teamengine-web/target/teamengine-common-libs.zip -d $catalina_base/lib
 
-echo "building TE_BASE"
+echo "[INFO] building TE_BASE"
 
 mkdir -p $catalina_base/TE_BASE
 export TE_BASE=$catalina_base/TE_BASE 
@@ -300,10 +316,10 @@ cd $folder_to_build/teamengine/teamengine-console/target/
 base_zip=$(ls *base.zip | grep -m 1 "base")
 unzip -q -o $folder_to_build/teamengine/teamengine-console/target/$base_zip -d $TE_BASE
 
-echo "copying sample of users"
+echo "[INFO] copying sample of users"
 cp -rf $user_temp_folder/ $TE_BASE/users
 
-echo "updating $TE_BASE/resources/site" 
+echo "[INFO] updating $TE_BASE/resources/site" 
 # The folder_site contains body, header and footer to customize TE.
 if [ -d "$folder_site" ];then
 
@@ -311,11 +327,11 @@ if [ -d "$folder_site" ];then
   cp -rf $folder_site $TE_BASE/resources/site
   
  else
-  echo "the following folder for site was not found: '$folder_site'. site was not updated"
+  echo "[WARNING] the following folder for site was not found: '$folder_site'. Site was not updated with custom information"
 fi
 
 
-echo 'creating setenv with environmental variables'
+echo '[INFO] creating setenv with environmental variables'
 cd $catalina_base/bin
 touch setenv.sh
 cat <<EOF >setenv.sh
@@ -334,37 +350,37 @@ export CATALINA_OPTS='-server -Xmx1024m -XX:MaxPermSize=128m -DTE_BASE=$TE_BASE 
 EOF
 
 chmod 777 *.sh
-
-
-echo "catalina_base was built at" $catalina_base 
-echo 'to start run: '$catalina_base'/bin/catalina.sh start'  
-echo 'to stop run: '$catalina_base'/bin/catalina.sh stop'  
+echo "[SUCCESS] TE build successfully"
+echo "[INFO] TE_BASE is $TE_BASE"
+echo "[INFO] catalina_base was built at $catalina_base"
+echo "[INFO] to start run $catalina_base/bin/catalina.sh start"  
+echo "[INFO] to stop run $catalina_base'/bin/catalina.sh stop"  
 
 
 ## If you want the script to start catalina, remove (or comment) the exit command with caution. It will stop any tomcat process and will start catalina_base where teamengine.war was installed.
 
 
 if [ "$start" = "true" ]; then
-  echo "starting tomcat but first - check running tomcat processes.."
+  echo "[INFO] starting tomcat but first - check running tomcat processes.."
   # gets the first process found "
 #  pid=$(ps axuw | grep tomcat | grep -v grep |  awk 'END{print $2'})
   pid=$(ps axuw | grep tomcat | grep -v grep)
   echo "pid is $pid"
   pidn=$(ps axuw | grep tomcat | grep -v grep | wc -l)
   echo " "
-  echo "number or processes: $pidn"
+  echo "[INFO] number or processes: $pidn"
   if [ $pidn -gt 1 ]; then
     pidlast=$(ps axuw | grep tomcat | grep -v grep | awk 'END{print $2'})
     kill -9 $pidlast
-    echo "process $pidlast was terminated"
+    echo "[INFO] process $pidlast was terminated"
 
   else
-    echo "Tomcat processes not found"
+    echo "[INFO] Tomcat processes not found"
   fi  
   
   sleep 3
 
-  echo "... starting tomcat ... "  
+  echo "[INFO] ... starting tomcat ... "  
   $catalina_base/bin/catalina.sh start   
 fi
 
