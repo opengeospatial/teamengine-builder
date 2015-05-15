@@ -1,17 +1,29 @@
 #!/bin/bash
 
-# wget http://apache.cs.utah.edu/tomcat/tomcat-7/v7.0.61/bin/apache-tomcat-7.0.61.zip
-dir=$(pwd)
-# unzip apache-tomcat-7.0.61.zip
+start=$SECONDS
 
-dir_to_build=$dir/te-build-demo
-./build_te.sh -t $dir/apache-tomcat-7.0.61 -b $dir_to_build
+realpath(){
+  thedir=$1
+  cd $thedir
+  pwd
+
+}
+
+
+rm -rf apache-tomcat-7.0.62.zip
+wget http://apache.mirrors.pair.com/tomcat/tomcat-7/v7.0.62/bin/apache-tomcat-7.0.62.zip
+unzip -o apache-tomcat-7.0.62.zip
+dir_to_build=te-build
+
+./build_te.sh -t apache-tomcat-7.0.62 -b $dir_to_build
 
 ## Warning: catalina_base and teamengine folder are created by build_te.sh.
+dir_to_build=$(realpath $dir_to_build)
 
 CATALINA_BASE=$dir_to_build/catalina_base
 TE_BASE=$CATALINA_BASE/TE_BASE/
 TE=$CATALINA_BASE/webapps/teamengine
+CSV_FILE=tests_to_build.csv
 
 ##start tomcat required to build teamengine folder
 $CATALINA_BASE/bin/catalina.sh start
@@ -19,18 +31,19 @@ sleep 5
 $CATALINA_BASE/bin/catalina.sh stop
 
 
-CSV_FILE=tests_to_build.csv
 ./install-all-tests.sh $TE_BASE $TE $CSV_FILE
 
-echo "Full installations of TEAM Engine and tests have been completed"
+duration=$(( SECONDS - start ))
+echo "[INFO] Full installations of TEAM Engine and tests have been completed"
+echo "[INFO] Time to build in seconds: $duration"
 
-echo "CATALINA_BASE $CATALINA_BASE"
-echo "TE_BASE $TE_BASE"
-echo "TE $TE"
+echo "[INFO] CATALINA_BASE: $CATALINA_BASE"
+echo "[INFO] TE_BASE: $TE_BASE"
+echo "[INFO] TE: $TE"
 echo ""
 
-echo "to start tomcat run: $CATALINA_BASE/bin/catalina.sh start"  
-echo "to stop tomcat run: $CATALINA_BASE'/bin/catalina.sh stop" 
+echo "[INFO] to start tomcat run: $CATALINA_BASE/bin/catalina.sh start"  
+echo "[INFO] to stop tomcat run: $CATALINA_BASE'/bin/catalina.sh stop" 
 echo ""
-echo "More information: https://github.com/opengeospatial/teamengine-builder/"
+echo "[INFO] More information: https://github.com/opengeospatial/teamengine-builder/"
 
