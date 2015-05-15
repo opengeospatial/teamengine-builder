@@ -2,6 +2,14 @@
 
 echo "" 
 dir=$(pwd)
+
+realpath(){
+  thedir=$1
+  cd $thedir
+  pwd
+
+}
+
 printHelp(){
 
   echo ""
@@ -99,7 +107,10 @@ done
 if [ -d $tomcat_base ];
 then
   if [ -f $tomcat_base/bin/catalina.sh ]; then
+  tomcat_base=$(realpath $tomcat_base)
   echo "[INFO] Using tomcat: " $tomcat_base
+
+
   else
       echo "[FAIL] Please provide a correct tomcat location, e.g. /home/ubuntu/apache-tomcat-7.0.52." 
       printHelp
@@ -126,11 +137,13 @@ fi
 if [ $base_folder ];
 then   
   if [ -d $base_folder ]; then
+    base_folder=$(realpath $base_folder)
     echo "[INFO] Building in a fresh base folder: " $base_folder
 
     else
-      echo "[INFO] Base folder '$base_folder ' was not found, so it will be created"
       mkdir $base_folder
+      base_folder=$(realpath $base_folder)
+      echo "[INFO] Building in a fresh base folder: " $base_folder
     fi 
 
 else
@@ -174,9 +187,11 @@ fi
 if [ $folder_site ];
 then
   echo "[INFO] The folder to be used to create custom site content is : " $folder_site 
+  folder_site=$(realpath $folder_site)
 else
 
   folder_site=$dir/site
+  folder_site=realpath $folder_site
   echo "[INFO] The folder site not provided, so $folder_site will be used: " 
 fi
 
