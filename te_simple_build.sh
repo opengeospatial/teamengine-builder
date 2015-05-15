@@ -12,10 +12,10 @@ realpath(){
 
 rm -rf apache-tomcat-7.0.62.zip
 wget http://apache.mirrors.pair.com/tomcat/tomcat-7/v7.0.62/bin/apache-tomcat-7.0.62.zip
-unzip -o apache-tomcat-7.0.62.zip
+unzip -oq apache-tomcat-7.0.62.zip
 dir_to_build=te-build
 
-./build_te.sh -t apache-tomcat-7.0.62 -b $dir_to_build
+./build_te.sh --tomcat apache-tomcat-7.0.62 --base-folder $dir_to_build --tag-or-branch 4.1-beta2  
 
 ## Warning: catalina_base and teamengine folder are created by build_te.sh.
 dir_to_build=$(realpath $dir_to_build)
