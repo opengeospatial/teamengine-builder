@@ -54,13 +54,13 @@ exit 0
 
 }
 
-if [ "$1" == "-h" -o "$1" == "--help" ]; then
+if [ "$1" = "-h" -o "$1" = "--help" ]; then
   printHelp
  
 
 fi 
 
-while [ "$1" != "" ]; do
+while [ "$1" ]; do
   key="$1"
 
   case $key in
