@@ -25,6 +25,11 @@ Update security Settings. Security Group should have::
 	HTTP (80)
 
 Connect via ssh (via terminal or configure putty)
+http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AccessingInstancesLinux.html
+
+For example if you are in a unix os machine type::
+
+	ssh -i my-key-pair.pem ubuntu@ec2-198-51-100-1.compute-1.amazonaws.com
 
 
 Install required software
