@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Installs the tests in a TE_BASE directory
 
@@ -56,7 +56,6 @@ if [ -z "$3" ]; then
 else
 	if [ ! -f "$3" ]; then
 		echo "[FAIL] Argument 3 '$3' is not a file. A CSV  file that provides a" 
-		echo "       git url and revision of the tests, as second argument is required."
 		printHelp
 		exit 0
 	fi		
@@ -84,18 +83,21 @@ OLDIFS=$IFS
 IFS=","
 
 
+
+
 csvfile=$ETS_FILE
 {
 	# skip the first line
+	echo "[INFO] Reading $ETS_FILE"
 	read
+	
 	while read url tag
-
 	do
-		echo ""	
+		echo '[INFO] Found ' $url $tag
 		cd $pwdd
 		if [ "$url" ]; then
 			
-			echo '[INFO] Processing' $url $tag
+			echo '[INFO] Processing ' $url $tag
 
 			if [ -d  temp ];
 			then

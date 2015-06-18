@@ -2,6 +2,13 @@
 
 start=$SECONDS
 
+# change this value with the tag or branch you want to build
+tag_or_branch=master
+tomcat_url=http://apache.mirrors.pair.com/tomcat/tomcat-7/v7.0.62/bin/apache-tomcat-7.0.62.zip
+temp_zip_name=temp.zip
+temp=temp
+
+
 realpath(){
   thedir=$1
   cd $thedir
@@ -10,12 +17,13 @@ realpath(){
 }
 
 
-rm -rf apache-tomcat-7.0.62.zip
-wget http://apache.mirrors.pair.com/tomcat/tomcat-7/v7.0.62/bin/apache-tomcat-7.0.62.zip
-unzip -oq apache-tomcat-7.0.62.zip
+rm -rf temp.zip
+wget $tomcat_url -O $temp_zip_name
+unzip -oq $temp_zip_name
+rm $temp_zip_name
 dir_to_build=te-build
 
-./build_te.sh --tomcat apache-tomcat-7.0.62 --base-folder $dir_to_build --tag-or-branch 4.1-beta2  
+./build_te.sh --tomcat $temp --base-folder $dir_to_build --tag-or-branch $tag_or_branch 
 
 ## Warning: catalina_base and teamengine folder are created by build_te.sh.
 dir_to_build=$(realpath $dir_to_build)
