@@ -191,7 +191,7 @@ then
 else
 
   folder_site=$dir/site
-  folder_site=realpath $folder_site
+  folder_site=realpath $folder_site/
   echo "[INFO] The folder site not provided, so $folder_site will be used: " 
 fi
 
@@ -369,7 +369,7 @@ echo "[SUCCESS] TE build successfully"
 echo "[INFO] TE_BASE is $TE_BASE"
 echo "[INFO] catalina_base was built at $catalina_base"
 echo "[INFO] to start run $catalina_base/bin/catalina.sh start"  
-echo "[INFO] to stop run $catalina_base'/bin/catalina.sh stop"  
+echo "[INFO] to stop run $catalina_base/bin/catalina.sh stop"  
 
 
 ## If you want the script to start catalina, remove (or comment) the exit command with caution. It will stop any tomcat process and will start catalina_base where teamengine.war was installed.
@@ -388,12 +388,13 @@ if [ "$start" = "true" ]; then
     pidlast=$(ps axuw | grep tomcat | grep -v grep | awk 'END{print $2'})
     kill -9 $pidlast
     echo "[INFO] process $pidlast was terminated"
+    sleep 4
 
   else
     echo "[INFO] Tomcat processes not found"
   fi  
   
-  sleep 3
+
 
   echo "[INFO] ... starting tomcat ... "  
   $catalina_base/bin/catalina.sh start   
