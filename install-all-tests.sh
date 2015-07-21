@@ -61,6 +61,10 @@ else
 	fi		
 fi	
 
+if [ "$4" ]; then
+  MVN_ARGUMENT=$4
+fi
+
 
 
 pwdd=$(pwd)
@@ -68,6 +72,7 @@ pwdd=$(pwd)
 TE_BASE=$1
 TE=$2
 ETS_FILE=$3
+MVN_ARGUMENT=$4
 
 
 logfile=log.txt
@@ -81,8 +86,6 @@ rm -rf $TE_BASE/scripts/* 1> /dev/null 2>&1;
 
 OLDIFS=$IFS
 IFS=","
-
-
 
 
 csvfile=$ETS_FILE
@@ -127,7 +130,7 @@ csvfile=$ETS_FILE
 			then
 				echo "[INFO] $tag of $ets_name exists. Checking it out."
 				git checkout $tag 1> /dev/null 2>&1;
-	         $pwdd/build_test.sh $TE_BASE $TE
+	         $pwdd/build_test.sh $TE_BASE $TE $MVN_ARGUMENT
 	        
 			else
 				echo "[ERROR] TAG NOT FOUND tag:'$tag 'it was not build"

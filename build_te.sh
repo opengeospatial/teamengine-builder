@@ -234,8 +234,9 @@ cd $folder_to_build
 if [ -z  $dev ] ; then
 
   ## download TE 
+  git clone $te_git_url teamengine
+  mss=$(git clone $te_git_url teamengine)
 
-  mss=$(git clone $te_git_url)
   if echo "$mss" | grep "fatal" ;
   then
     err="[FAIL] - Repository doesn't exist: $te_git_url"
@@ -243,6 +244,7 @@ if [ -z  $dev ] ; then
     exit 0
 
   fi  
+
 
 
   cd $folder_to_build/teamengine 
@@ -271,8 +273,12 @@ if [ -z  $dev ] ; then
 else
   echo "[INFO] Running development mode - building from local folder"
   if [ -d $dev ]; then
-    echo "[INFO] copying from  $dev to $folder_to_build"
-    cp -rf $dev $folder_to_build/teamengine
+    if [ ! -d $folder_to_build/teamengine ]; then  
+      mkdir $folder_to_build/teamengine 
+    fi  
+    echo "[INFO] Copying from  $dev to $folder_to_build"
+    ##cp -rf $dev $folder_to_build/teamengine
+    cp -rf $dev/* $folder_to_build/teamengine
     cd $folder_to_build/teamengine
     mvn -q clean install -DskipTests=true
     

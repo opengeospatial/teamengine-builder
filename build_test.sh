@@ -30,21 +30,18 @@ else
   fi  
 fi
 
-if [ -z "$3" ]; then
-  echo "[INFO] Third argument (-DskipTests) was provided - packaging and testing"
-  echo "$moreInfo"
-else
-  if [ "$3" = "-DskipTests" ]; then
+if [ "$3" ]; then
+  if [ "$3" == "-DskipTests" ]; then
     echo "[INFO] Tests will be skipped when packaging using -DskipTests"
     SKIP="-DskipTests"
+  else
+    echo "[WARNING] Third argument was provided, but is not -DskipTests. Tests will be run"
   fi  
+
 fi
 
 TE_BASE=$1
 TE=$2
-
-
-
 
 dir=$(pwd)
 test_name=$(basename $dir)
@@ -54,9 +51,15 @@ catalina_base=$folder/catalina_base
 #webapps_lib=$catalina_base/webapps/teamengine/WEB-INF/lib
 webapps_lib=$TE/WEB-INF/lib
 logfile=log-te-build-test.txt
+errorlog=error-log.txt
+
 if [ -f $logfile ]; then
   rm $logfile 1> /dev/null 2>&1;
 fi 
+
+if [ -f $error-log ]; then
+  rm $error-log
+fi  
 
 echo "[INFO] Packaging via MAVEN with this command:' mvn $SKIP package'"
 mvn $SKIP package > $logfile 2>&1 
@@ -64,6 +67,7 @@ grep "BUILD SUCCESS" $logfile &> /dev/null
 if [ $? -ne 0 ]; then
   echo "[FAIL] Packaging of $dir via MAVEN failed." 
   echo "       Details in $logfile."
+  echo "$test_name" >>error-log
   exit 0
   
 else
@@ -95,6 +99,7 @@ else
 fi
 
 echo "[SUCCESS] - Built test '$test_name' in $TE_BASE".
+echo ""
 if [ -f $logfile ]; then
   rm $logfile 
 fi
