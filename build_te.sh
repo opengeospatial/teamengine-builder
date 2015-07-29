@@ -1,5 +1,7 @@
 #!/bin/sh
 
+
+
 echo "" 
 dir=$(pwd)
 
@@ -12,16 +14,27 @@ realpath(){
 
 printHelp(){
 
+  echo "---------"
+  echo "Usage build_te [-t tomcat or -cb catalinabasefolder] [-options] "
   echo ""
-  echo "Usage build_te -t tomcat [-options] "
+  echo "There are two main ways to build."
+  echo "1. From scratch, Tomcat and catalina_base are not setup"
+  echo "2. catalina_base is allready setup"
+  echo ""
+  echo "For the first case. -t parameter needs to be passed as argument." 
+  echo "For the second case --cb needs to passed as argument."
+  echo "It is mandatory to use one or the other."
   echo ""
   echo "where:"
   echo "  tomcat                    is the path to tomcat, e.g. /home/ubuntu/apache-tomcat-7.0.52"
+  echo "  catalinabasefolder        is the path to the CATALINA_BASE directory. it should contain "
+  echo "                            webapps and lib folders. amongst others"
   echo ""
   echo "where options include:"
   echo "  -g (or --git-url)         URL to a git repository (local or external) for the  TEAM Engine source"
   echo "                            for example: https://github.com/opengeospatial/teamengine.git"
-  echo "                            if not provided this will be used; https://github.com/opengeospatial/teamengine.git"
+  echo "                            if not provided this will be used:"
+  echo "                            https://github.com/opengeospatial/teamengine.git"
   echo ""
   echo "  -a (or --tag-or-branch)   to build a specific tag or branch"
   echo "                            if not provided master will be used"
@@ -29,8 +42,8 @@ printHelp(){
   echo "  -b (or --base-folder)     local path where teamengine will be build from scratch."
   echo "                            if not given ~/te-build will be used."
   echo ""
-  echo "  -w (or --war)             local path where teamengine will be build from scratch."
-  echo "                            If not given teamengine will be used"
+  echo "  -w (or --war)             War name"
+  echo "                            If not given 'teamengine' will be used"
   echo ""
   echo "  -s (or --start)           if 'true' it will attempt to stop a tomcat a process and start it again"
   echo ""
@@ -49,16 +62,16 @@ printHelp(){
   echo "" 
   echo "more information about TEAM Engine at https://github.com/opengeospatial/teamengine/  "
   echo "more information about this builder at https://github.com/opengeospatial/teamengine-builder/ "
-  echo "" 
+  echo "----------" 
 exit 0
 
 }
 
 if [ "$1" = "-h" -o "$1" = "--help" ]; then
   printHelp
- 
 
 fi 
+
 
 while [ "$1" ]; do
   key="$1"
@@ -96,43 +109,76 @@ while [ "$1" ]; do
       folder_site="$2"
       shift
       ;;
+      -cb|--catalina_base)
+      catalinabasefolder="$2"
+      shift
+      ;;
 
       
       
       
   esac
   shift
-done    
+done  
 
-if [ -d $tomcat_base ];
+if [ $catalinabasefolder ];
 then
-  if [ -f $tomcat_base/bin/catalina.sh ]; then
-  tomcat_base=$(realpath $tomcat_base)
-  echo "[INFO] Using tomcat: " $tomcat_base
-
-
-  else
-      echo "[FAIL] Please provide a correct tomcat location, e.g. /home/ubuntu/apache-tomcat-7.0.52." 
-      printHelp
-  fi
+  if [ -d $catalinabasefolder ];
+  then 
+    echo "[INFO] Using catalinabasefolder: " $catalinabasefolder
+  fi  
 else
-  echo "[FAIL] Please provide a correct tomcat location, e.g. /home/ubuntu/apache-tomcat-7.0.52." 
-  echo ""
-  printHelp
-  
-fi
+  if [ $tomcat_base ];
+  then
+    if [ -f $tomcat_base/bin/catalina.sh ]; then
+    tomcat_base=$(realpath $tomcat_base)
+    echo "[INFO] Using tomcat: " $tomcat_base
 
+
+    else
+        echo "[FAIL] Please provide a correct tomcat location, e.g. /home/ubuntu/apache-tomcat-7.0.52." 
+        printHelp
+    fi
+  else
+    echo "[FAIL] Please provide a correct tomcat installation or CATALINA_BASE folder"
+    echo ""
+    printHelp
+      
+  fi
+fi   
+
+
+if [ $dev ]; then
+  echo "[INFO] Running in development mode. The local source to be used is "$dev
+  te_git_url=""
+  te_tag=""
+
+else
+
+  if [ $te_git_url ];
+  then
+      echo "[INFO] Using git url: " $te_git_url
+  else
+
+      echo  "[INFO] The git url  was not provided,  so 'https://github.com/opengeospatial/teamengine.git' will be used"
+      te_git_url=https://github.com/opengeospatial/teamengine.git
+  fi  
+
+  if [ $te_tag ];
+  then
+    echo "[INFO] Building " $te_tag
+  else
+    echo "[INFO] Did not provide a tag to build 'te_tag', so building master"
+    te_tag="master"
+  fi    
+
+  
+fi  
 
 
 # If a a specific tag or branch is not given then the master will be built
 
-if [ $te_tag ];
-then
-  echo "[INFO] Building " $te_tag
-else
-  echo "[INFO] Did not provide a tag to build 'te_tag', so building master"
-  te_tag="master"
-fi    
+
 
 if [ $base_folder ];
 then   
@@ -166,13 +212,7 @@ else
   war=teamengine
 fi   
 
-if [ $te_git_url ];
-then
-    echo "[INFO] Using git url: " $te_git_url
-else
-    echo  "[INFO] The git url  was not provide,  so 'https://github.com/opengeospatial/teamengine.git' will be used"
-    te_git_url=https://github.com/opengeospatial/teamengine.git
-fi  
+
 
 if $start ; then
     if [ "$start" = "true" ]; then
@@ -231,7 +271,7 @@ fi
 echo "[INFO] Installing TEAM Engine "
 cd $folder_to_build
 # if dev is not given
-if [ -z  $dev ] ; then
+if [ ! $dev ] ; then
 
   ## download TE 
   git clone $te_git_url teamengine
@@ -244,8 +284,6 @@ if [ -z  $dev ] ; then
     exit 0
 
   fi  
-
-
 
   cd $folder_to_build/teamengine 
   tags=$(git tag)
@@ -292,28 +330,29 @@ fi
 
 echo "[SUCCESS] TE has been installed and built successfully"
 echo " "
-echo "[INFO] Build catalina_base "
 
+if [ ! $catalinabasefolder ];
+then
+  echo "[INFO] Now building catalina_base "
+  cd $folder_to_build
+  catalina_base=$folder_to_build/catalina_base 
 
-cd $folder_to_build
+  if [ -d $catalina_base ]; then
+    rm -rf $catalina_base
+  fi  
 
+  mkdir -p $catalina_base
+  echo "[INFO] clean, create and populate catalina base in $catalina_base" 
 
-catalina_base=$folder_to_build/catalina_base 
+  cd $catalina_base
+  mkdir bin logs temp webapps work lib
 
-
-if [ -d $catalina_base ]; then
-  rm -rf $catalina_base
-fi  
-
-mkdir -p $catalina_base
-echo "[INFO] clean, create and populate catalina base in $catalina_base" 
-
-cd $catalina_base
-mkdir bin logs temp webapps work lib
-
-## copy from tomcat bin and base files
-cp $tomcat/bin/catalina.sh bin/
-cp -r $tomcat/conf $catalina_base
+  ## copy from tomcat bin and base files
+  cp $tomcat/bin/catalina.sh bin/
+  cp -r $tomcat/conf $catalina_base
+else
+  catalina_base=$catalinabasefolder 
+fi
 
 echo "[INFO] copying war: $war_name in $catalina_base/webapps/"
 ## move tomcat to catalina_base
@@ -321,7 +360,7 @@ echo "[INFO] copying war: $war_name in $catalina_base/webapps/"
 #echo "updating war file with custom source" - not working
 #jar -uvf $folder_to_build/teamengine/teamengine-web/target/teamengine.war $folder_site
 
-
+rm -rf $catalina_base/webapps/*
 cp $folder_to_build/teamengine/teamengine-web/target/teamengine.war $catalina_base/webapps/$war_name.war
 
 echo "[INFO] unzipping  common libs in $catalina_base/lib "
@@ -351,6 +390,11 @@ if [ -d "$folder_site" ];then
   echo "[WARNING] the following folder for site was not found: '$folder_site'. Site was not updated with custom information"
 fi
 
+if [ $catalinabasefolder ]; then
+  echo "[SUCCESS] TE build successfully"
+  echo "[INFO] Now start tomcat depending on your configuration"
+  exit 0
+fi
 
 echo '[INFO] creating setenv with environmental variables'
 cd $catalina_base/bin
@@ -405,4 +449,6 @@ if [ "$start" = "true" ]; then
   echo "[INFO] ... starting tomcat ... "  
   $catalina_base/bin/catalina.sh start   
 fi
+
+
 
