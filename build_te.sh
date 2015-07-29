@@ -188,8 +188,13 @@ then
 
     else
       mkdir $base_folder
-      base_folder=$(realpath $base_folder)
-      echo "[INFO] Building in a fresh base folder: " $base_folder
+      if [ -d $base_folder ]; then
+        base_folder=$(realpath $base_folder)
+        echo "[INFO] Building in a fresh base folder: " $base_folder
+      else
+        echo "[FAIL] Error creating" $base_folder
+        exit 0
+      fi  
     fi 
 
 else
@@ -258,11 +263,12 @@ war_name=$war
 
 
 ##  clean 
+echo "[INFO] - cleaning - removing folder to build "$folder_to_build
 if [ -d $folder_to_build ]; 
 then
   mv -f $folder_to_build $folder_to_build.bak
   rm -rf $folder_to_build/*
-  mkdir $folder_to_build
+  
 fi  
 
 
