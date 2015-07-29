@@ -272,7 +272,7 @@ echo "[INFO] Installing TEAM Engine "
 cd $folder_to_build
 # if dev is not given
 if [ ! $dev ] ; then
-
+  rm -rf teamengine
   ## download TE 
   git clone $te_git_url teamengine
   mss=$(git clone $te_git_url teamengine)
@@ -286,22 +286,29 @@ if [ ! $dev ] ; then
   fi  
 
   cd $folder_to_build/teamengine 
-  tags=$(git tag)
 
-  if echo "$tags" | grep -q "$te_tag"; then
-      found="tag"
+  if [ "$te_tag" = "master" ];then
+    echo "[INFO] Checking out: master branch "
+  
   else
-    echo "Tag $te_tag not found, so looking for branches"
-    branches=$(git branch -a)
-    if echo "$branches" | grep -q "$te_tag"; then
-      found="branch"
-     else 
-      echo "[FAIL] Branch or Tag $te_tag not found";
-        exit
-     fi   
-  fi
+    tags=$(git tag)
 
-  echo "[INFO] Checking out: $te_tag $found"
+    if echo "$tags" | grep -q "$te_tag"; then
+        found="tag"
+    else
+      echo "Tag $te_tag not found, so looking for branches"
+      branches=$(git branch -a)
+      if echo "$branches" | grep -q "$te_tag"; then
+        found="branch"
+       else 
+        echo "[FAIL] Branch or Tag $te_tag not found";
+          exit
+       fi   
+    fi
+    echo "[INFO] Checking out: $te_tag $found"
+
+   fi 
+ 
   git checkout $te_tag 
   
   echo "[INFO] Building using Maven in quite mode (1-2 min)"
