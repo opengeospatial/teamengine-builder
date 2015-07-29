@@ -261,7 +261,7 @@ war_name=$war
 if [ -d $folder_to_build ]; 
 then
   mv -f $folder_to_build $folder_to_build.bak
-  rm -rf $folder_to_build
+  rm -rf $folder_to_build/*
   mkdir $folder_to_build
 fi  
 
@@ -390,8 +390,8 @@ echo "[INFO] updating $TE_BASE/resources/site"
 # The folder_site contains body, header and footer to customize TE.
 if [ -d "$folder_site" ];then
 
-  rm -r $TE_BASE/resources/site
-  cp -rf $folder_site $TE_BASE/resources/site
+  rm -r $TE_BASE/resources/site/*
+  cp -rf $folder_site/* $TE_BASE/resources/site
   
  else
   echo "[WARNING] the following folder for site was not found: '$folder_site'. Site was not updated with custom information"
