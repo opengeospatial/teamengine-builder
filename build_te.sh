@@ -231,8 +231,8 @@ then
 else
 
   folder_site=$dir/site
-  folder_site=realpath $folder_site/
-  echo "[INFO] The folder site not provided, so $folder_site will be used: " 
+##  folder_site=realpath $folder_site/
+  echo "[INFO] The folder site was not provided, so $folder_site will be used: " 
 fi
 
  
