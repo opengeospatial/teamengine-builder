@@ -5,6 +5,24 @@
 # TEAM Engine deployment directory
 # example: ./build_simple_one.sh $TE_BASE tomcat/webapps/teamengine
 
+
+printHelp(){
+
+  echo "Builds a test from the test directory."
+  echo "Usage build_test.sh TE_BASE TEAM_ENGINE SKIP_TESTS"
+  echo ""
+  echo "where:"
+  echo ""
+  echo "  TE_BASE           is the  TE_BASE directory"
+  echo "  TEAM_ENGINE       is the  TEAM_ENGINE directory"
+  echo "  SKIP_TESTS        true or false to skip tests while building mvn"
+  echo ""
+  echo "More information: https://github.com/opengeospatial/teamengine-builder/"
+
+}
+
+
+
 if [ -z "$1" ]; then
   echo "[FAIL] Require a directory where TE_BASE is located, as the fist argument."
   echo "$moreInfo"
@@ -31,11 +49,11 @@ else
 fi
 
 if [ "$3" ]; then
-  if [ "$3" == "-DskipTests" ]; then
+  if [ "$3" == "true" ]; then
     echo "[INFO] Tests will be skipped when packaging using -DskipTests"
     SKIP="-DskipTests"
   else
-    echo "[WARNING] Third argument was provided, but is not -DskipTests. Tests will be run"
+    echo "[WARNING] Third argument was provided, but is not 'true'. Tests will be run"
   fi  
 
 fi

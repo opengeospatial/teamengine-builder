@@ -11,7 +11,7 @@
 printHelp(){
 
   echo ""
-  echo "Usage install-all-tests.sh TE_BASE TEAM_ENGINE CSV_FILE DIR_TO_BUILD  EXTRA_MVN_ARGUMENT"
+  echo "Usage install-all-tests.sh TE_BASE TEAM_ENGINE CSV_FILE DIR_TO_BUILD  SKIP_TESTS"
   echo ""
   echo "where:"
   echo ""
@@ -19,7 +19,7 @@ printHelp(){
   echo "  TEAM_ENGINE    		is the  TEAM_ENGINE directory"
   echo "  CSV_FILE       		is a CSV  file that provides per test a git url and revision number" 
   echo "  DIR_TO_BUILD   		temporary directory to build tests "
-  echo "  EXTRA_MVN_ARGUMENT  extra maven argument, for example: -DskipTests=true "
+  echo "  SKIP_TESTS  			true or false to skip tests while building mvn"
   echo ""
   echo "More information: https://github.com/opengeospatial/teamengine-builder/"
 
@@ -68,10 +68,17 @@ if [ ! -d "$4" ]; then
 	printHelp
 	exit 0
 fi
-if [ "$5" ]; then
-  MVN_ARGUMENT=$5
-fi
 
+
+if [ "$5" ]; then
+  if [ "$5" == "true" ]; then
+    echo "[INFO] Tests will be skipped when packaging using -DskipTests"
+    SKIP="true"
+  else
+    echo "[WARNING] Third argument was provided, but is not 'true'. Tests will be run"
+  fi  
+
+fi
 
 
 pwdd=$(pwd)
@@ -80,7 +87,6 @@ TE_BASE=$1
 TE=$2
 ETS_FILE=$3
 temp=$4
-MVN_ARGUMENT=$5
 
 
 logfile=log.txt
@@ -138,7 +144,7 @@ csvfile=$ETS_FILE
 			then
 				echo "[INFO] $tag of $ets_name exists. Checking it out."
 				git checkout $tag 1> /dev/null 2>&1;
-	         $pwdd/build_test.sh $TE_BASE $TE $MVN_ARGUMENT
+	         $pwdd/build_test.sh $TE_BASE $TE $SKIP
 	        
 			else
 				echo "[ERROR] TAG NOT FOUND tag:'$tag 'it was not build"
