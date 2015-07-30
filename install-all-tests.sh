@@ -67,7 +67,7 @@ if [ -d "$4" ]; then
 	echo "[FAIL] Argument 4 '$4' is not a directory."
 	printHelp
 	exit 0
-
+fi
 if [ "$5" ]; then
   MVN_ARGUMENT=$5
 fi
