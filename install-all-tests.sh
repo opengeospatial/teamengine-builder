@@ -11,13 +11,15 @@
 printHelp(){
 
   echo ""
-  echo "Usage install-all-tests.sh $TE_BASE $TEAM_ENGINE $CSV_FILE "
+  echo "Usage install-all-tests.sh TE_BASE TEAM_ENGINE CSV_FILE DIR_TO_BUILD  EXTRA_MVN_ARGUMENT"
   echo ""
   echo "where:"
   echo ""
-  echo "  TE_BASE        is the  TE_BASE directory"
-  echo "  TEAM_ENGINE    is the  TEAM_ENGINE directory"
-  echo "  CSV_FILE       is a CSV  file that provides per test a git url and revision number" 
+  echo "  TE_BASE        		is the  TE_BASE directory"
+  echo "  TEAM_ENGINE    		is the  TEAM_ENGINE directory"
+  echo "  CSV_FILE       		is a CSV  file that provides per test a git url and revision number" 
+  echo "  DIR_TO_BUILD   		temporary directory to build tests "
+  echo "  EXTRA_MVN_ARGUMENT  extra maven argument, for example: -DskipTests=true "
   echo ""
   echo "More information: https://github.com/opengeospatial/teamengine-builder/"
 
@@ -61,8 +63,13 @@ else
 	fi		
 fi	
 
-if [ "$4" ]; then
-  MVN_ARGUMENT=$4
+if [ -d "$4" ]; then
+	echo "[FAIL] Argument 4 '$4' is not a directory."
+	printHelp
+	exit 0
+
+if [ "$5" ]; then
+  MVN_ARGUMENT=$5
 fi
 
 
@@ -72,7 +79,8 @@ pwdd=$(pwd)
 TE_BASE=$1
 TE=$2
 ETS_FILE=$3
-MVN_ARGUMENT=$4
+temp=$4
+MVN_ARGUMENT=$5
 
 
 logfile=log.txt
@@ -102,12 +110,12 @@ csvfile=$ETS_FILE
 			
 			echo '[INFO] Processing ' $url $tag
 
-			if [ -d  temp ];
+			if [ -d  $temp ];
 			then
-				rm -rf temp 1> /dev/null 2>&1;
+				rm -rf $temp/* 1> /dev/null 2>&1;
 			fi	
-			mkdir temp
-			cd temp
+			
+			cd $temp
 			
 			
 			mss=$(git clone -q $url)
