@@ -49,11 +49,11 @@ else
 fi
 
 if [ "$3" ]; then
-  if [ "$3" == "true" ]; then
+  if [ "$3" = "true" ]; then
     echo "[INFO] Tests will be skipped when building using -DskipTests"
     SKIP="-DskipTests"
   else
-    echo "[WARNING] Third argument was provided, but is not 'true'. Tests will be run"
+    echo "[WARNING] Third argument was provided, but is not 'true'. Tests will run when building"
   fi  
 
 fi
@@ -79,7 +79,7 @@ if [ -f $error-log ]; then
   rm $error-log
 fi  
 
-echo "[INFO] Building via MAVEN with this command:' mvn package $SKIP '"
+echo "[INFO] Building via MAVEN with this command:' mvn install $SKIP '"
 mvn install $SKIP > $logfile 2>&1 
 grep "BUILD SUCCESS" $logfile &> /dev/null
 if [ $? -ne 0 ]; then
