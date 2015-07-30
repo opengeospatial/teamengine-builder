@@ -110,47 +110,48 @@ csvfile=$ETS_FILE
 	
 	while read url tag
 	do
-		echo '[INFO] Found ' $url $tag
-		cd $pwdd
-		if [ "$url" ]; then
-			
-			echo '[INFO] Processing ' $url $tag
+		if [ ! "$url" = "Repository" ] && [ ! "$url" = "" ]; then
+			echo '[INFO] Found ' $url $tag
+			cd $pwdd
+			if [ "$url" ]; then
+				
+				echo '[INFO] Processing ' $url $tag
 
-			if [ -d  $temp ];
-			then
-				rm -rf $temp/* 1> /dev/null 2>&1;
-			fi	
-			
-			cd $temp
-			
-			
-			mss=$(git clone -q $url)
-
-			
-			if echo "$mss" | grep "fatal" ;
+				if [ -d  $temp ];
 				then
-					err="[ERROR] - repository doesn't exist: $url"
-					echo "$err" >> $logfile
-					echo "$err"
-					exit 0
+					rm -rf $temp/* 1> /dev/null 2>&1;
+				fi	
+				
+				cd $temp
+				
+				
+				mss=$(git clone -q $url)
 
-			fi	
-			ets_name=$(basename "$url" .git)
-			cd $ets_name
-			tags=$(git tag)
+				
+				if echo "$mss" | grep "fatal" ;
+					then
+						err="[ERROR] - repository doesn't exist: $url"
+						echo "$err" >> $logfile
+						echo "$err"
+						exit 0
 
-			
-			if echo "$tags" | grep -q "$tag"; 
-			then
-				echo "[INFO] $tag of $ets_name exists. Checking it out."
-				git checkout $tag 1> /dev/null 2>&1;
-	         $pwdd/build_test.sh $TE_BASE $TE $SKIP
-	        
-			else
-				echo "[ERROR] TAG NOT FOUND tag:'$tag 'it was not build"
-				echo "[ERROR] TAG NOT FOUND tag:'$tag 'it was not build" >> $logfile
-			fi	
-		
+				fi	
+				ets_name=$(basename "$url" .git)
+				cd $ets_name
+				tags=$(git tag)
+
+				
+				if echo "$tags" | grep -q "$tag"; 
+				then
+					echo "[INFO] $tag of $ets_name exists. Checking it out."
+					git checkout $tag 1> /dev/null 2>&1;
+		         $pwdd/build_test.sh $TE_BASE $TE $SKIP
+		        
+				else
+					echo "[ERROR] TAG NOT FOUND tag:'$tag 'it was not build"
+					echo "[ERROR] TAG NOT FOUND tag:'$tag 'it was not build" >> $logfile
+				fi	
+			fi
 		fi
 	done
 } < $csvfile		 
