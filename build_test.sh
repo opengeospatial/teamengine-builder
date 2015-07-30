@@ -50,7 +50,7 @@ fi
 
 if [ "$3" ]; then
   if [ "$3" == "true" ]; then
-    echo "[INFO] Tests will be skipped when packaging using -DskipTests"
+    echo "[INFO] Tests will be skipped when building using -DskipTests"
     SKIP="-DskipTests"
   else
     echo "[WARNING] Third argument was provided, but is not 'true'. Tests will be run"
@@ -79,17 +79,17 @@ if [ -f $error-log ]; then
   rm $error-log
 fi  
 
-echo "[INFO] Packaging via MAVEN with this command:' mvn $SKIP package'"
-mvn $SKIP package > $logfile 2>&1 
+echo "[INFO] Building via MAVEN with this command:' mvn package $SKIP '"
+mvn install $SKIP > $logfile 2>&1 
 grep "BUILD SUCCESS" $logfile &> /dev/null
 if [ $? -ne 0 ]; then
-  echo "[FAIL] Packaging of $dir via MAVEN failed." 
+  echo "[FAIL] Building of $dir via MAVEN failed." 
   echo "       Details in $logfile."
   echo "$test_name" >>error-log
   exit 0
   
 else
-  echo "[INFO] Packaging of $dir via MAVEN was OK"
+  echo "[INFO] Building of $dir via MAVEN was OK"
 fi 
 
 
