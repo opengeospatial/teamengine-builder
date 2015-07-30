@@ -81,8 +81,8 @@ if [ -f $error-log ]; then
   rm $error-log
 fi  
 
-echo "[INFO] Building via MAVEN with this command:' mvn install $SKIP '"
-mvn install $SKIP > $logfile 2>&1 
+echo "[INFO] Building via MAVEN with this command:' mvn clean install $SKIP '"
+mvn clean install $SKIP > $logfile 2>&1 
 grep "BUILD SUCCESS" $logfile &> /dev/null
 if [ $? -ne 0 ]; then
   echo "[FAIL] Building of $dir via MAVEN failed." 
