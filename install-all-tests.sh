@@ -71,13 +71,15 @@ fi
 
 
 if [ "$5" ]; then
-  if [ "$5" == "true" ]; then
+  if [ "$5" = "true" ]; then
     echo "[INFO] Tests will be skipped when packaging using -DskipTests"
     SKIP="true"
   else
-    echo "[WARNING] Third argument was provided, but is not 'true'. Tests will be run"
+    echo "[WARNING] Fifth argument was provided, but it is not 'true'." 
+    echo "          Tests will run when building mvn "
   fi  
-
+else
+   echo "[INFO] 5th argument was not provided. Tests will not be skipped."
 fi
 
 
