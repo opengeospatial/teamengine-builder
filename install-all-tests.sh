@@ -63,7 +63,7 @@ else
 	fi		
 fi	
 
-if [ -d "$4" ]; then
+if [ ! -d "$4" ]; then
 	echo "[FAIL] Argument 4 '$4' is not a directory."
 	printHelp
 	exit 0
