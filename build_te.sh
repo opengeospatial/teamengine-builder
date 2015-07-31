@@ -185,20 +185,14 @@ then
   if [ -d $base_folder ]; then
     base_folder=$(realpath $base_folder)
     echo "[INFO] Building in a fresh base folder: " $base_folder
-
-    else
-      mkdir $base_folder
-      if [ -d $base_folder ]; then
-        base_folder=$(realpath $base_folder)
-        echo "[INFO] Building in a fresh base folder: " $base_folder
-      else
-        echo "[FAIL] Error creating" $base_folder
-        exit 0
-      fi  
-    fi 
+  else
+     echo "[FAIL] Base folder doesn't exist" $base_folder
+     exit 0
+        
+  fi 
 
 else
-  echo "[INFO] Base folder was not provided, so it will be build in the user's directory '~/te-build'"
+  echo "[INFO] Base folder was not provided, so it will attempt to build in the user's directory '~/te-build'"
   if [ ! -d  ~/te-build ]; then
    mkdir -p ~/te-build
   fi  

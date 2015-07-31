@@ -8,6 +8,9 @@
 #catalina_base=$folder/catalina_base
 #TE_BASE=$catalina_base/TE_BASE
 
+fail_message="\n--------------FAILURES-------------------"
+failures=0
+
 printHelp(){
 
   echo ""
@@ -147,7 +150,15 @@ csvfile=$ETS_FILE
 				then
 					echo "[INFO] $tag of $ets_name exists. Checking it out."
 					git checkout $tag 1> /dev/null 2>&1;
-		         $pwdd/build_test.sh $TE_BASE $TE $SKIP
+		         install_mss=$($pwdd/build_test.sh $TE_BASE $TE $SKIP)
+		         echo $install_mss
+		         if echo "$install_mss" | grep "[FAIL]" ;
+		         then
+		         	fail_message=$fail_message"\n"$ets_name" "$tag
+		         	failures=$(($failures + 1 ))
+		         	
+
+		         fi 	
 		        
 				else
 					echo "[ERROR] TAG NOT FOUND tag:'$tag 'it was not build"
@@ -159,7 +170,11 @@ csvfile=$ETS_FILE
 } < $csvfile		 
 IFS=$OLDIFS
 
-
+if [[ "$failures" -gt 0 ]]; then
+	echo "Total failures: "$failures
+	echo $fail_message
+	echo ""
+fi	
 
 
 
