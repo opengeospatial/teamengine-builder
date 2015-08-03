@@ -170,13 +170,9 @@ csvfile=$ETS_FILE
 } < $csvfile		 
 IFS=$OLDIFS
 
-if [[ "$failures" -gt 0 ]]; then
+if [ "$failures" -gt 0 ]; then
 	echo "Total failures: "$failures
 	echo $fail_message
 	echo ""
-fi	
-
-
-
-
+fi
 

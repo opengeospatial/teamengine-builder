@@ -358,7 +358,6 @@ then
   cp $tomcat/bin/catalina.sh bin/
   cp -r $tomcat/conf $catalina_base
 else
-  rm -rf webapps/*
   catalina_base=$catalinabasefolder 
 fi
 
