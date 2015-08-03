@@ -358,6 +358,7 @@ then
   cp $tomcat/bin/catalina.sh bin/
   cp -r $tomcat/conf $catalina_base
 else
+  rm -rf webapps/*
   catalina_base=$catalinabasefolder 
 fi
 
@@ -375,6 +376,8 @@ unzip -q -o $folder_to_build/teamengine/teamengine-web/target/teamengine-common-
 
 echo "[INFO] building TE_BASE"
 
+cd $catalina_base
+rm TE_BASE
 mkdir -p $catalina_base/TE_BASE
 export TE_BASE=$catalina_base/TE_BASE 
 
