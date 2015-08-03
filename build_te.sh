@@ -260,7 +260,7 @@ war_name=$war
 echo "[INFO] - cleaning - removing folder to build "$folder_to_build
 if [ -d $folder_to_build ]; 
 then
-  mv -f $folder_to_build $folder_to_build.bak
+  cp -f $folder_to_build $folder_to_build.bak
   rm -rf $folder_to_build/*
   
 fi  
