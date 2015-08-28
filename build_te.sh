@@ -22,7 +22,7 @@ printHelp(){
   echo "2. catalina_base is allready setup"
   echo ""
   echo "For the first case. -t parameter needs to be passed as argument." 
-  echo "For the second case --cb needs to passed as argument."
+  echo "For the second case -cb needs to passed as argument."
   echo "It is mandatory to use one or the other."
   echo ""
   echo "where:"
@@ -376,7 +376,7 @@ unzip -q -o $folder_to_build/teamengine/teamengine-web/target/teamengine-common-
 echo "[INFO] building TE_BASE"
 
 cd $catalina_base
-rm TE_BASE
+rm -rf TE_BASE
 mkdir -p $catalina_base/TE_BASE
 export TE_BASE=$catalina_base/TE_BASE 
 
