@@ -6,25 +6,43 @@
 
 list_of_files_to_remove=""
 flag='false'
+echo ""
+echo "Files to Delete"
+echo ""
 
 ## echo "Possible repeated files:"
 
 for PREFIX in `ls *.jar|sed 's/-[0-9\.a-zA-Z]*\.jar//g'|uniq -d`; do 
-  echo "   " $PREFIX 
+# echo "   Prefix:  " $PREFIX 
 
-#now do a reverse sorted listing with the jar name and remove the 
-#top line so that non latest versions are returned 
 
-  for FILE in `ls -r ${PREFIX}*|sed '1d'`; do 
-    ##echo "$FILE"
-    list_of_files_to_remove="$list_of_files_to_remove $FILE"
-    ##rm -f $FILE 
-    flag = "true"
+#now do a reverse sorted listing with the jar name and remove the older one
+# 
+#Get the latest version jar file 		
+#This command only works in ubuntu>> sorted_file=$(ls -r ${PREFIX}* | sort -t- -k2 -V -r | head -1)
+
+sorted_file=$(ls -r ${PREFIX}* | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./g;' | sort -r | sed 's/^0// ; s/\.0/./g' | head -1)
+
+#list the files with PREFIX
+
+
+
+  for FILE in `ls -r ${PREFIX}*`; do 
+
+	#Delete the older version files	
+	if [ "$sorted_file" != "$FILE" ];
+	then
+		echo " "$FILE
+		#rm -f $FILE
+		list_of_files_to_remove="$list_of_files_to_remove $FILE"
+	fi
+
+    flag= "true"
    done 
    
-
+echo "---------------------------------------"
 done 
-if [ "$flag" = "true" ]; then
+if [ "$flag"="true" ]; then
 	echo "issue the following command to remove jars with old versions"
 	echo "sudo rm -r $list_of_files_to_remove" 
 else
