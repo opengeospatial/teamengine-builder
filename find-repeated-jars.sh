@@ -16,12 +16,27 @@ for PREFIX in `ls *.jar|sed 's/-[0-9\.a-zA-Z]*\.jar//g'|uniq -d`; do
 # echo "   Prefix:  " $PREFIX 
 
 
+## Check filename contains the string "pending"
+
+for FILE in `ls -r ${PREFIX}*`; do 
+
+	if echo $FILE | grep -q "pending";then
+		list_of_files_to_remove="$list_of_files_to_remove $FILE"
+
+		#rm -f $FILE		
+	fi
+   done
+
+
+
 #now do a reverse sorted listing with the jar name and remove the older one
 # 
 #Get the latest version jar file 		
 #This command only works in ubuntu>> sorted_file=$(ls -r ${PREFIX}* | sort -t- -k2 -V -r | head -1)
 
 sorted_file=$(ls -r ${PREFIX}* | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./g;' | sort -r | sed 's/^0// ; s/\.0/./g' | head -1)
+
+
 
 #list the files with PREFIX
 
