@@ -6,13 +6,18 @@ set current_dir=%CD%
 REM echo off
 
 REM ECHO We're working with "!location!"
+echo.
+echo.
 echo -------------------------------------
+echo.
 
 if "%1" == "-h" set res=%1
 if "%1" == "-help" set res=%1
 if DEFINED res (
 
 call :printHelp
+
+GOTO END
 ) 
 ::---------------------------------------------------------------
 
@@ -95,13 +100,20 @@ if DEFINED catalinabasefolder (
 			echo "[INFO] Using tomcat:!tomcat_base! " 
 		) else (
 			echo "[FAIL] Please provide a correct tomcat location, e.g. C:\apache-tomcat-8.0.26" 
+			echo.
+			echo.
 			call :printHelp
+			 GOTO END
 			)
 			
     ) else  (
+		echo.
+		echo.
 		echo "[FAIL] Please provide a correct tomcat installation or CATALINA_BASE folder"
 		echo ""
+		echo.
 	   call :printHelp
+	   GOTO END
 	  )
 )
   
@@ -282,7 +294,9 @@ echo "[INFO] Using Base folder: !base_folder!"
 		
 	) else (
 			echo "[INFO] Running development mode - building from local folder"
+			if EXIST teamengine (
 			rd /s /q teamengine
+			)
 			if EXIST !dev! (
 				if NOT EXIST !folder_to_build!\teamengine (
 					echo "!folder_to_build!\teamengine"	
@@ -365,7 +379,11 @@ echo ---------------------------------------------------------------------------
 		echo "[INFO] unzipping  common libs in !catalina_base!\lib "
 
 
-		7z x !folder_to_build!\teamengine\teamengine-web\target\teamengine-common-libs.zip "*.*" -o!catalina_base!\lib -r
+	pushd !catalina_base!\lib
+	
+	jar xf !folder_to_build!\teamengine\teamengine-web\target\teamengine-common-libs.zip
+	
+	popd
 
 		echo "[INFO] building TE_BASE"
 
@@ -381,8 +399,12 @@ echo ---------------------------------------------------------------------------
 		cd /d !folder_to_build!\teamengine\teamengine-console\target
 
 		FOR %%f IN (!folder_to_build!\teamengine\teamengine-console\target\*base.zip) DO SET "base_zip=%%~nxf"
-		
-		7z x !folder_to_build!\teamengine\teamengine-console\target\!base_zip! "*.*" -o!TE_BASE! -r
+	
+		pushd !TE_BASE!
+	
+		jar xf !folder_to_build!\teamengine\teamengine-console\target\!base_zip!
+	
+		popd
 
 		echo "[INFO] copying sample of users"
 		
@@ -474,12 +496,16 @@ GOTO END
   echo "Usage build_te [-t tomcat or -cb catalinabasefolder] [-options] "
   echo ""
   echo "There are two main ways to build."
+  echo.
   echo "1. From scratch, Tomcat and catalina_base are not setup"
   echo "2. catalina_base is already setup"
+  echo.
   echo ""
   echo "For the first case. -t parameter needs to be passed as argument." 
   echo "For the second case -cb needs to passed as argument."
   echo "It is mandatory to use one or the other."
+  echo.
+  echo.
   echo ""
   echo "where:"
   echo "  tomcat                    Is the path to tomcat, e.g. C:\apache-tomcat-7.0.52"
@@ -522,9 +548,7 @@ GOTO END
   echo "more information about this builder at https://github.com/opengeospatial/teamengine-builder/ "
   echo "----------" 
 
-GOTO :END
+GOTO END
 
 :END
-echo.
-echo.
-echo "--------------------------- End of script -------------------------------------------"
+
