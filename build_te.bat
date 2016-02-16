@@ -5,7 +5,7 @@ setlocal enabledelayedexpansion
 set current_dir=%CD%
 REM echo off
 
-REM ECHO We're working with "!location!"
+
 echo.
 echo.
 echo -------------------------------------
