@@ -34,7 +34,7 @@ for FILE in `ls -r ${PREFIX}*`; do
 #Get the latest version jar file 		
 #This command only works in ubuntu>> sorted_file=$(ls -r ${PREFIX}* | sort -t- -k2 -V -r | head -1)
 
-sorted_file=$(ls -r ${PREFIX}* | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./g;' | sort -r | sed 's/^0// ; s/\.0/./g' | head -1)
+sorted_file=$(ls -r ${PREFIX}* | grep -v "pending" | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./g;' | sort -r | sed 's/^0// ; s/\.0/./g' | head -1)
 
 
 
@@ -45,7 +45,7 @@ sorted_file=$(ls -r ${PREFIX}* | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.
   for FILE in `ls -r ${PREFIX}*`; do 
 
 	#Delete the older version files	
-	if [ "$sorted_file" != "$FILE" ];
+	if [ "$sorted_file" != "$FILE" ] && echo $FILE | grep -v "pending";
 	then
 		echo " "$FILE
 		#rm -f $FILE
