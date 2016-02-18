@@ -47,7 +47,7 @@ sorted_file=$(ls -r ${PREFIX}* | grep -v "pending" | sed 's/^[0-9]\./0&/; s/\.\(
 	#Delete the older version files	
 	if [ "$sorted_file" != "$FILE" ] && echo $FILE | grep -v "pending";
 	then
-		echo " "$FILE
+		#echo " "$FILE
 		#rm -f $FILE
 		list_of_files_to_remove="$list_of_files_to_remove $FILE"
 	fi
