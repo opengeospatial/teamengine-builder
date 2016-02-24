@@ -6,26 +6,46 @@
 
 list_of_files_to_remove=""
 flag='false'
+suppress=""
+
 echo ""
 echo "Files to Delete"
 echo ""
 
-## echo "Possible repeated files:"
+## Method to check the element with the array
+array_contains2 () { 
+    local array="$1[@]"
+    local seeking=$2
+    local in=1
+    for element in "${!array}"; do
+        if [[ $element != $seeking ]]; then
+            in=0
+	    suppress=${element} 	
+            break
+        fi
+    done
+    return $in
+}
 
-for PREFIX in `ls *.jar|sed 's/-[0-9\.a-zA-Z]*\.jar//g'|uniq -d`; do 
-# echo "   Prefix:  " $PREFIX 
+## echo "Possible repeated files:"
 
 
 ## Check filename contains the string "pending"
-
-for FILE in `ls -r ${PREFIX}*`; do 
+for FILE in `ls -r *.jar`; do 
 
 	if echo $FILE | grep -q "pending";then
 		list_of_files_to_remove="$list_of_files_to_remove $FILE"
 
 		#rm -f $FILE		
 	fi
-   done
+   done  
+
+# for PREFIX in `ls *.jar| grep -v "pending" |sed 's/-[0-9\.a-zA-Z]*\.jar//g'|uniq`; do
+
+for PREFIX in `ls *.jar| grep -v "pending" |sed 's/^\(.*\)-.*$/\1/'|uniq`; do 
+
+ #echo "   Prefix:  " $PREFIX 
+
 
 
 
@@ -34,18 +54,30 @@ for FILE in `ls -r ${PREFIX}*`; do
 #Get the latest version jar file 		
 #This command only works in ubuntu>> sorted_file=$(ls -r ${PREFIX}* | sort -t- -k2 -V -r | head -1)
 
+sorted_array=( $(ls -r ${PREFIX}* | grep -v "pending" | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./g;' | sort -r | sed 's/^0// ; s/\.0/./g' | sed 's/^\(.*\)-.*$/\1/') )
+
+
+
+## Call method to check the elements from the array
+array_contains2 "sorted_array" "${PREFIX}" && status="true" || status="false"
+statuss=$?
+
+if [ "$status" == "true" ]; then
+
+sorted_file=$(ls -r ${PREFIX}* | grep -v "pending" | grep -v "${suppress}" | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./g;' | sort -r | sed 's/^0// ; s/\.0/./g' | head -1)
+
+else
+
 sorted_file=$(ls -r ${PREFIX}* | grep -v "pending" | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./g;' | sort -r | sed 's/^0// ; s/\.0/./g' | head -1)
 
+fi
 
+#list the files with PREFIX	
 
-#list the files with PREFIX
-
-
-
-  for FILE in `ls -r ${PREFIX}*`; do 
+  for FILE in `( ls -r ${PREFIX}* | grep -v "${suppress}" ) || ( ls -r ${PREFIX}* )` ; do 
 
 	#Delete the older version files	
-	if [ "$sorted_file" != "$FILE" ] && echo $FILE | grep -v "pending";
+	if [ "$sorted_file" != "$FILE" ] && echo $FILE | grep -qv "pending";
 	then
 		#echo " "$FILE
 		#rm -f $FILE
@@ -54,12 +86,16 @@ sorted_file=$(ls -r ${PREFIX}* | grep -v "pending" | sed 's/^[0-9]\./0&/; s/\.\(
 
     flag= "true"
    done 
-   
-echo "---------------------------------------"
-done 
+
+done
+
 if [ "$flag"="true" ]; then
 	echo "issue the following command to remove jars with old versions"
 	echo "sudo rm -r $list_of_files_to_remove" 
+	echo ""
 else
 	echo "No repeated jars were found."
 fi
+
+
+
