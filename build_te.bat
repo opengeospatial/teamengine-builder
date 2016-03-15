@@ -444,7 +444,7 @@ echo ---------------------------------------------------------------------------
 			
 			type !catalina_base!\bin\setenv.bat.old | findstr /v \-DTE_BASE >> !catalina_base!\bin\setenv.bat
 			
-			echo "SET CATALINA_OPTS=-server -Xmx1024m -XX:MaxPermSize=128m -DTE_BASE=!TE_BASE!" >> !catalina_base!\bin\setenv.bat
+			echo SET CATALINA_OPTS=-server -Xmx1024m -XX:MaxPermSize=128m -DTE_BASE=!TE_BASE! >> !catalina_base!\bin\setenv.bat
 			del  !catalina_base!\bin\setenv.bat.old
 		  echo "[SUCCESS] TE build successfully"
 		  echo "[INFO] Now start tomcat depending on your configuration"
