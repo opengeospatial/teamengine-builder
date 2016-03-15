@@ -210,7 +210,7 @@ echo "[INFO] Using Base folder: !base_folder!"
 	echo "[INFO] - cleaning - removing folder to build "!folder_to_build!
 	
 	if EXIST !folder_to_build! (
-	  xcopy !folder_to_build! "!folder_to_build!.bak" /s /h /q /i
+	  xcopy !folder_to_build! "!folder_to_build!.bak" /s /h /q /i /y
 	  pushd !folder_to_build!
 	  SET "STATUS="
 	  REM Check if the files or dir are exists in the dir !folder_to_build!
@@ -240,15 +240,16 @@ echo "[INFO] Using Base folder: !base_folder!"
 		REM rd /s /q teamengine
 		REM download TE 
 		REM  git clone !te_git_url! teamengine
-		for /f "delims=" %%i in ('git clone !te_git_url! teamengine') do set git_message=%%i
+		REM for /f "delims=" %%i in ('git clone !te_git_url! teamengine') do set git_message=%%i
+		git clone !te_git_url! teamengine
 		
-		  If NOT "!git_message!"=="!git_message:fatal=!" (
+		  If !errorlevel! NEQ 0 (
 			
 			set err="[FAIL] - Repository doesn't exist: !te_git_url!"
 			echo "!err!"
 			GOTO END
 		  )
-
+			
 			cd /d !folder_to_build!\teamengine 
 
 		if "!te_tag!"=="master" (
@@ -437,6 +438,14 @@ echo ---------------------------------------------------------------------------
 			)
 
 		if DEFINED catalinabasefolder (
+		
+		REM ------ Update current TE_BASE path into setenv.bat file -------------
+			move !catalina_base!\bin\setenv.bat !catalina_base!\bin\setenv.bat.old
+			
+			type !catalina_base!\bin\setenv.bat.old | findstr /v \-DTE_BASE >> !catalina_base!\bin\setenv.bat
+			
+			echo "SET CATALINA_OPTS=-server -Xmx1024m -XX:MaxPermSize=128m -DTE_BASE=!TE_BASE!" >> !catalina_base!\bin\setenv.bat
+			del  !catalina_base!\bin\setenv.bat.old
 		  echo "[SUCCESS] TE build successfully"
 		  echo "[INFO] Now start tomcat depending on your configuration"
 		  GOTO END
