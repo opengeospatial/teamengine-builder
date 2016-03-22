@@ -27,34 +27,14 @@ array_contains2 () {
     return $in
 }
 
-## echo "Possible repeated files:"
-
-
-## Check filename contains the string "pending"
-for FILE in `ls -r *.jar`; do 
-
-	if echo $FILE | grep -q "pending";then
-		list_of_files_to_remove="$list_of_files_to_remove $FILE"
-
-		#rm -f $FILE		
-	fi
-   done  
-
-# for PREFIX in `ls *.jar| grep -v "pending" |sed 's/-[0-9\.a-zA-Z]*\.jar//g'|uniq`; do
-
-for PREFIX in `ls *.jar| grep -v "pending" |sed 's/^\(.*\)-.*$/\1/'|uniq`; do 
-
- #echo "   Prefix:  " $PREFIX 
-
-
-
+sort_file () {
 
 #now do a reverse sorted listing with the jar name and remove the older one
 # 
 #Get the latest version jar file 		
 #This command only works in ubuntu>> sorted_file=$(ls -r ${PREFIX}* | sort -t- -k2 -V -r | head -1)
 
-sorted_array=( $(ls -r ${PREFIX}* | grep -v "pending" | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./g;' | sort -r | sed 's/^0// ; s/\.0/./g' | sed 's/^\(.*\)-.*$/\1/') )
+sorted_array=( $(ls -r ${PREFIX}* | grep -v "pending" | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./; s/\.\([0-9]\+-\)/.0\1/g; s/\.\([0-9]\)\./.0\1./g;' | sed 's/^\(.*\)-.*$/\1/') )
 
 
 
@@ -64,12 +44,67 @@ statuss=$?
 
 if [ "$status" == "true" ]; then
 
-sorted_file=$(ls -r ${PREFIX}* | grep -v "pending" | grep -v "${suppress}" | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./g;' | sort -r | sed 's/^0// ; s/\.0/./g' | head -1)
+sorted_file=$(ls -r ${PREFIX}* | grep -v "pending" | grep -v "${suppress}" | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./; s/\.\([0-9]\+-\)/.0\1/g; s/\.\([0-9]\)\./.0\1./g;' | sort -r | sed 's/^0// ; s/\.0/./g' | head -1)
 
 else
 
-sorted_file=$(ls -r ${PREFIX}* | grep -v "pending" | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./g;' | sort -r | sed 's/^0// ; s/\.0/./g' | head -1)
+sorted_file=$(ls -r ${PREFIX}* | grep -v "pending" | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./; s/\.\([0-9]\+-\)/.0\1/g; s/\.\([0-9]\)\./.0\1./g;' | sort -r | sed 's/^0// ; s/\.0/./g' | head -1)
 
+fi
+
+echo $sorted_file
+}
+
+## echo "Possible repeated files:"
+
+
+## Check filename contains the string "pending"
+for FILE in `ls -r *.jar`; do 
+
+	if echo $FILE | grep -q "pending" | grep -v "geoapi" | grep -v "xml-apis";then
+		list_of_files_to_remove="$list_of_files_to_remove $FILE"
+
+		#rm -f $FILE		
+	fi
+   done  
+
+# for PREFIX in `ls *.jar| grep -v "pending" |sed 's/-[0-9\.a-zA-Z]*\.jar//g'|uniq`; do
+
+for PREFIX in `ls *.jar| sed 's/^\(.*\)-.*$/\1/'|uniq`; do 
+
+ #echo "   Prefix:  " $PREFIX 
+
+if echo $PREFIX | grep -q "geoapi"; then
+	
+	pending_count=$( ls -r ${PREFIX}* | sed 's/pending-//g' | wc -l )
+	
+	if [ "$pending_count" == 1 ]; then
+	
+	sorted_file=$(ls -r ${PREFIX}*)	
+
+	else
+
+	sorted_file=$(ls -r ${PREFIX}* | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./; s/\.\([0-9]\+-\)/.0\1/g; s/\.\([0-9]\)\./.0\1./g;' | sort -r | sed 's/^0// ; s/\.0/./g' | head -1)
+			
+	fi
+else
+	if echo $PREFIX | grep -q "xml-apis"; then
+
+	pending_count=$( ls -r ${PREFIX}* | sed 's/pending-//g' | wc -l )
+	
+		if [ "$pending_count" == 1 ]; then
+	
+		sorted_file=$(ls -r ${PREFIX}*)	
+
+		else
+
+		sorted_file=$(ls -r ${PREFIX}* | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./; s/\.\([0-9]\+-\)/.0\1/g; s/\.\([0-9]\)\./.0\1./g;' | sort -r | sed 's/^0// ; s/\.0/./g' | head -1)
+			
+		fi
+	else	
+		##-----Call method 'sort_file'-----##
+		sorted_file=$( sort_file )		
+	fi
 fi
 
 #list the files with PREFIX	
