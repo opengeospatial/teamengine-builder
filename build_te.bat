@@ -210,12 +210,19 @@ echo "[INFO] Using Base folder: !base_folder!"
 	echo "[INFO] - cleaning - removing folder to build "!folder_to_build!
 	
 	if EXIST !folder_to_build! (
-	  xcopy !folder_to_build! "!folder_to_build!.bak" /s /h /q /i
+	  xcopy !folder_to_build! "!folder_to_build!.bak" /s /h /q /i /y
 	  pushd !folder_to_build!
-	  for /f "Tokens=*" %%A in ('dir /B /S /A:-D^|FIND /V "%~nx0"') do del /q "%%A"
-	 rem cd !folder_to_build!
+	  SET "STATUS="
+	  REM Check if the files or dir are exists in the dir !folder_to_build!
+	  for /f %%A in ('dir /b !folder_to_build!\*.*') do set "STATUS=exists"
+	  if "!STATUS!" == "exists" (
 	  
-	   for /f "Tokens=*" %%A in ('dir /B /A:D') do rd /q /s "%%A"
+		  for /f "Tokens=*" %%A in ('dir /B /S /A:-D^|FIND /V "%~nx0"') do del /q "%%A"
+		 rem cd !folder_to_build!
+		  
+		   for /f "Tokens=*" %%A in ('dir /B /A:D') do rd /q /s "%%A"
+		)  
+		
 	 popd
 	)
 	
@@ -233,15 +240,16 @@ echo "[INFO] Using Base folder: !base_folder!"
 		REM rd /s /q teamengine
 		REM download TE 
 		REM  git clone !te_git_url! teamengine
-		for /f "delims=" %%i in ('git clone !te_git_url! teamengine') do set git_message=%%i
+		REM for /f "delims=" %%i in ('git clone !te_git_url! teamengine') do set git_message=%%i
+		git clone !te_git_url! teamengine
 		
-		  If NOT "!git_message!"=="!git_message:fatal=!" (
+		  If !errorlevel! NEQ 0 (
 			
 			set err="[FAIL] - Repository doesn't exist: !te_git_url!"
 			echo "!err!"
 			GOTO END
 		  )
-
+			
 			cd /d !folder_to_build!\teamengine 
 
 		if "!te_tag!"=="master" (
@@ -369,9 +377,14 @@ echo ---------------------------------------------------------------------------
 		rem  md !catalina_base!\webapps
 		pushd !catalina_base!\webapps
 		REM   Delete files and sub directories
-		for /f "Tokens=*" %%A in ('dir /B /S /A:-D^|FIND /V "%~nx0"') do del /q "%%A"
-		for /f "Tokens=*" %%A in ('dir /B /A:D') do rd /s /q "%%A"
-		
+		SET "STATUS="
+		REM Check if the files or dir are exists in the dir !folder_to_build!
+		for /f %%A in ('dir /b !catalina_base!\webapps\*.*') do set "STATUS=exists"
+		  if "!STATUS!" == "exists" (
+			
+			for /f "Tokens=*" %%A in ('dir /B /S /A:-D^|FIND /V "%~nx0"') do del /q "%%A"
+			for /f "Tokens=*" %%A in ('dir /B /A:D') do rd /s /q "%%A"
+		)
 		popd
 		
 		copy "!folder_to_build!\teamengine\teamengine-web\target\teamengine.war" "!catalina_base!\webapps\!war_name!.war"
@@ -425,6 +438,14 @@ echo ---------------------------------------------------------------------------
 			)
 
 		if DEFINED catalinabasefolder (
+		
+		REM ------ Update current TE_BASE path into setenv.bat file -------------
+			move !catalina_base!\bin\setenv.bat !catalina_base!\bin\setenv.bat.old
+			
+			type !catalina_base!\bin\setenv.bat.old | findstr /v \-DTE_BASE >> !catalina_base!\bin\setenv.bat
+			
+			echo SET CATALINA_OPTS=-server -Xmx1024m -XX:MaxPermSize=128m -DTE_BASE=!TE_BASE! >> !catalina_base!\bin\setenv.bat
+			del  !catalina_base!\bin\setenv.bat.old
 		  echo "[SUCCESS] TE build successfully"
 		  echo "[INFO] Now start tomcat depending on your configuration"
 		  GOTO END
@@ -437,7 +458,7 @@ echo ---------------------------------------------------------------------------
 		 (
 		echo rem !/bin/sh
 		echo rem path to java jdk
-		echo set JAVA_HOME=C:\Program Files\Java\jdk1.7.0_51
+		echo set JAVA_HOME=!JAVA_HOME!
 		echo rem This file creates requeried environmental variables 
 		echo rem to properly run teamengine in tomcat
 		echo.

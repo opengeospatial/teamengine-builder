@@ -1,83 +1,21 @@
 Introduction
+------------
+
+This repository provides easy to use scripts to install, from scratch and configure `TEAM Engine <https://github.com/opengeospatial/teamengine>`_ in Windows and Unix Machines
+
+Prerequisites
 -------------
-
-This repository provides easy to use scripts to install, from scratch and configure `TEAM Engine <https://github.com/opengeospatial/teamengine>`_ in an Ubuntu machine in the Amazon Cloud. 
-
-
-Setup Amazon Instance
-------------------------
-
-Login to Amazon
-
-Launch Instance::
-
-	https://us-west-2.console.aws.amazon.com/ec2/v2/home?region=us-west-2#LaunchInstanceWizard:
-
-Select a free tier eligible::
-
-	Ubuntu Server 14.04 LTS (HVM), SSD Volume Type		
-
-Review and Launch
-
-Update security Settings. Security Group should have::
-
-	SSH (22)
-	HTTP (80)
-
-Connect via ssh (via terminal or configure putty)
-http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AccessingInstancesLinux.html
-
-For example if you are in a unix os machine type::
-
-	ssh -i my-key-pair.pem ubuntu@ec2-198-51-100-1.compute-1.amazonaws.com
+The machine where TEAM Engine will be installed requires:
 
 
-Install required software
------------------------------	
-	
-Update::
-	
-	sudo apt-get update        
-	sudo apt-get upgrade 	
+- **Java 8**: Download Java JDK (Java Development Kit) 8, from `here <http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html>`_.
+- **Maven 2**: It has been tested with Maven 2.2.1 and **Maven 3.2.2**: Download Maven version 3.2.2 from `here <http://apache.mesi.com.ar/maven/maven-3/3.2.2/binaries/apache-maven-3.2.2-bin.zip>`_.
+- **Git 1.8**: Download Git-SCM version 1.8 or newer  `here <http://git-scm.com/download/win>`_.
+- **Apache Tomcat 7**: It has been tested with Tomcat version 7.0.52, can be download from `here <http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.52/bin/>`_.
 
-Install Java JDK::
-
-	sudo apt-get install openjdk-7-jdk
-
-Configure JAVA_HOME::
-
-	export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64
-	export PATH=$JAVA_HOME/bin:$PATH
-
-
-Install git::
-
-	sudo apt-get install git
-
-Install maven::		
-
-	sudo apt-get install maven
-
-
-Download tomcat::
-
-	wget http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.52/bin/apache-tomcat-7.0.52.zip
-
-Unzip::
-
-	unzip apache-tomcat-7.0.52.zip 
-
-
-Configure port 8080	
-----------------------
-
-Open port 80 and redirect 8080::
-
-	sudo iptables -A INPUT -p tcp --dport 80 -j ACCEPT
-	sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
 
 Download and run TE builder
-----------------------------------------
+---------------------------
 
 Download te-build helper scripts::
 
@@ -95,21 +33,40 @@ Run te-build::
 
 	./build_te.sh -a 4.1.0b -t /home/ubuntu/apache-tomcat-7.0.52	
 
-Go to the `EC2 Management console <https://us-west-2.console.aws.amazon.com/ec2/v2/home?region=us-west-2#Instances:sort=instanceState>`_ and get the public IP of your amazaon instance, for example: http://54.201.134.109. 
-
-Go to teamengine web interface, typing for example http://54.201.134.109/teamengine::
-
-	http://YourIP/teamengine
+Start tomcat and you should see teamengine at htpp://localhost:8080/teamengine or similar configuration
 
 
-Optional if not building in Ubuntu
-------------------------------------
-Update the file with the location of tomcat, where the software will be build etc..::
+Installation of the tests
+-------------------------
 
-		nano build_te.sh 
+Assume:
+
+- $catalina_base is a variable with the path to catalina_base
+- $war is the name of the war. For example *teamengine*
+- $TE_BASE is the location of TE_BASE
+
+Do the following:
+
+#. Identify a file in csv format that has all the tests. For example: production-releases/201601.csv
+#. Identify where TE_BASE is located. For example: $catalina_base/TE_BASE
+#. Identify where the deployed war is located. For example: $catalina_base/webapps/$war 
+
+run ./install-all-tests.sh::
+
+   ./install-all-tests.sh $TE_BASE $catalina_base/webapps/$war production-releases/201601.csv
+
+Go again to htpp://localhost:8080/teamengine, you should see all the tests.   
 
 
-Check that in setven all paths have setup correctly::
+Jar cleanup
+-----------
 
-		nano setenv.sh
+There might be the case that  that jars are repeated in the web installation. Do the following:
+
+#. go to WEB-INF/lib  
+#. run find-repeated-jars.sh
+
+It will suggest a command to remove repeated jars.
+   
+
 
