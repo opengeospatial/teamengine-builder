@@ -3,6 +3,7 @@ https://github.com/opengeospatial/teamengine,4.7
 https://github.com/opengeospatial/ets-csw202.git,1.16
 https://github.com/opengeospatial/ets-cat30.git,0.10
 https://github.com/opengeospatial/ets-gml32.git,1.23
+https://github.com/opengeospatial/ets-gpkg10.git,0.1
 https://github.com/opengeospatial/ets-kml22.git,1.12
 https://github.com/opengeospatial/ets-kml2.git,0.5
 https://github.com/opengeospatial/ets-owc10.git,0.1
@@ -14,7 +15,7 @@ https://github.com/opengeospatial/ets-sos10.git,1.13
 https://github.com/opengeospatial/ets-sos20.git,1.12
 https://github.com/opengeospatial/ets-sps10.git,1.7
 https://github.com/opengeospatial/ets-sps20.git,1.10
-https://github.com/opengeospatial/ets-sta10.git,0.4
+https://github.com/opengeospatial/ets-sta10.git,0.5
 https://github.com/opengeospatial/ets-wcs10.git,1.11
 https://github.com/opengeospatial/ets-wcs11.git,1.8
 https://github.com/opengeospatial/ets-wcs20.git,1.9
