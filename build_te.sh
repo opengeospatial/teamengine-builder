@@ -123,6 +123,32 @@ while [ "$1" ]; do
   shift
 done  
 
+#--------- Check pre-condtions for the java, git, maven, tomcat.
+
+
+if echo $(java -version 2>&1) | grep -q -v "java"; then
+	echo ""
+	echo "[ERROR] Java not found. Please install JAVA."
+	echo ""
+	exit 0
+fi
+
+if echo $(mvn -version 2>&1) | grep -q -v "maven"; then
+	echo ""
+	echo "[ERROR] Maven not found. Please install Maven."
+	echo ""
+	exit 0
+fi
+
+if echo $(git -version 2>&1) | grep -q -v "git"; then
+	echo ""
+	echo "[ERROR] Git not found. Please install git."
+	echo ""
+	exit 0
+fi
+
+#--- End of pre-conditions. -----
+
 if [ $catalinabasefolder ];
 then
   if [ -d $catalinabasefolder ];

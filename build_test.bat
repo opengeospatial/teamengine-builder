@@ -92,7 +92,7 @@ set status=%3
 	cd target
 	
 	for /f "delims=" %%i in ('dir /s/b *ctl.zip 2^>NUL') do set zip_ctl_file=%%i
-	for /f "delims=" %%i in ('dir /s/b *dep.zip 2^>NUL') do set zip_deps_file=%%i
+	for /f "delims=" %%i in ('dir /s/b *deps.zip 2^>NUL') do set zip_deps_file=%%i
 	if DEFINED zip_ctl_file (
 		echo "DEPS File Name: " !zip_ctl_file!
 		echo '[INFO] Installing' !zip_ctl_file! 'at'  !TE_BASE!\scripts
