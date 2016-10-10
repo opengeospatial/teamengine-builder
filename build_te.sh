@@ -396,6 +396,7 @@ echo "[INFO] copying war: $war_name in $catalina_base/webapps/"
 #jar -uvf $folder_to_build/teamengine/teamengine-web/target/teamengine.war $folder_site
 
 rm -rf $catalina_base/webapps/*
+mkdir $catalina_base/webapps
 cp $folder_to_build/teamengine/teamengine-web/target/teamengine.war $catalina_base/webapps/$war_name.war
 
 echo "[INFO] unzipping  common libs in $catalina_base/lib "
