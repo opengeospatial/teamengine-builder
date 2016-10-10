@@ -30,54 +30,46 @@ if DEFINED param (
 
 			set te_tag=%~2
 			shift
-			echo In TE tags case...."!te_tag!"
 			
 		) else if "%1"=="-b" (
 
 			set base_folder=%2
 			shift
-			echo In base_folder...."!base_folder!"
 		
 		) else if "%1"=="-t" (
 
 			set tomcat_base=%2
 			shift
-			echo In tomcat_base case...."!tomcat_base!"
+			
 		) else if "%1"=="-w" (
 
 			set war=%2
 			shift
-			echo In war case...."!war!"
 			
 		)  else if "%1"=="-g" (
 
 			set te_git_url=%2
 			shift
-			echo In te_git_url case...."!te_git_url!"
 			
 		) else if "%1"=="-s" (
 
 			set start=%2
 			shift
-			echo In start case...."!start!"
 
 		) else if "%1"=="-d" (
 
 			set dev=%2
 			shift
-			echo "In dev case...."!dev!
 			
 		) else if "%1"=="-f" (
 
 			set folder_site=%2
 			shift
-			echo In folder_site case...."!folder_site!"
 			
 		) else if "%1"=="-cb" (
 
 			set catalinabasefolder=%2
 			shift
-			echo In catalinabasefolder case...."!catalinabasefolder!"
 		)
 
 
@@ -85,6 +77,34 @@ shift
 GOTO :loop
 
 ) 
+
+REM -- Checking pre-conditions for java, git, maven, tomcat is installed or not.
+
+	if "!JAVA_HOME!" == "" (
+		echo.
+		echo "[FAIL] JAVA not found. Please install Git."
+		echo.
+		GOTO END
+	)
+	
+	set "git_status=false"
+	for /f "tokens=*" %%g in ( 'call git --version' ) do  echo %%g | findstr /lic:"git" >nul && set "git_status=true"
+	if "!git_status!" == "false" (
+		echo.
+		echo "[FAIL] Git not found. Please install Git."
+		echo.
+		GOTO END
+	)
+	
+	set "mvn_status=false"
+	for /f "tokens=*" %%g in ( 'call mvn -version' ) do  echo %%g | findstr /lic:"maven" >nul && set "mvn_status=true"
+	if "!mvn_status!" == "false" (
+		echo.
+		echo "[FAIL] Maven not found. Please install Maven."
+		echo.
+		GOTO END
+	)
+REM -- END Pre-conditions ---	
 
 if DEFINED catalinabasefolder (
 
