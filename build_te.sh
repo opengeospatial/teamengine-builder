@@ -395,8 +395,9 @@ echo "[INFO] copying war: $war_name in $catalina_base/webapps/"
 #echo "updating war file with custom source" - not working
 #jar -uvf $folder_to_build/teamengine/teamengine-web/target/teamengine.war $folder_site
 
-rm -rf $catalina_base/webapps/*
-mkdir -p $catalina_base/webapps
+cd $catalina_base
+rm -rf webapps/*
+mkdir -p webapps
 cp $folder_to_build/teamengine/teamengine-web/target/teamengine.war $catalina_base/webapps/$war_name.war
 
 echo "[INFO] unzipping  common libs in $catalina_base/lib "
