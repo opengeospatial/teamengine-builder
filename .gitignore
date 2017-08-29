@@ -1,3 +1,8 @@
 /.project
 /dummy-test.sh
 /test.sh
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
