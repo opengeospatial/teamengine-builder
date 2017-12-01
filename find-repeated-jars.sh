@@ -10,45 +10,78 @@ for PREFIX in `ls *.jar| sed 's/^\(.*\)-.*$/\1/'|uniq`; do
 
 prefix_file_count=$( ls -r ${PREFIX}* | wc -l )
 
-if [ "$prefix_file_count" -gt "1" ]; then
+if echo "$PREFIX" | grep -vq -E 'geoapi.|*pending'; then
 
+	if [ "$prefix_file_count" -gt "1" ]; then
 	sorted_file=""
-	for FILE in `ls -r ${PREFIX}* | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./; s/\.\([0-9]\+-\)/.0\1/g; s/\.\([0-9]\)\./.0\1./g;'`; do
-
-		file_prefix=$( echo ${FILE} | sed 's/^\(.*\)-.*$/\1/' )
-
-		echo "File Prefix: <$file_prefix>"
-		skip_file=""
-		if [[ ${PREFIX} != ${file_prefix} ]]; then
-			    skip_file=${FILE}
-			    echo "Skipped File: <$skip_file>" 	
-			    break
+		for FILE in `ls -r ${PREFIX}* | grep -v 'pending' | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./; s/\.\([0-9]\+-\)/.0\1/g; s/\.\([0-9]\)\./.0\1./g;'`; do
+			file_prefix=$( echo ${FILE} | sed 's/^\(.*\)-.*$/\1/' )
+			skip_file=""
+			if [[ ${PREFIX} != ${file_prefix} ]]; then
+				    skip_file=${FILE}
+				    break
 			fi
-	done
+		done
 
-	if [[ -n "$skip_file" ]]; then
-	echo "test......................."
-	sorted_file=$( ls -r ${PREFIX}* | grep -v "${skip_file}" | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./; s/\.\([0-9]\+-\)/.0\1/g; s/\.\([0-9]\)\./.0\1./g;' | sort -r | sed 's/^0// ; s/\.0/./g' | head -1 )
-	for deleteFile in `ls -r ${PREFIX}* | grep -v "${sorted_file}" | grep -v "${skip_file}" | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./; s/\.\([0-9]\+-\)/.0\1/g; s/\.\([0-9]\)\./.0\1./g;'`; do
+		if [[ -n "$skip_file" ]]; then
+		
+			sorted_file=$( ls -r ${PREFIX}* | grep -v 'pending' | grep -v "${skip_file}" | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./; s/\.\([0-9]\+-\)/.0\1/g; s/\.\([0-9]\)\./.0\1./g;' | sort -r | sed 's/^0// ; s/\.0/./g' | head -1 )
+		
+			for deleteFile in `ls -r ${PREFIX}* | grep -v 'pending' | grep -v "${sorted_file}" | grep -v "${skip_file}" | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./; s/\.\([0-9]\+-\)/.0\1/g; s/\.\([0-9]\)\./.0\1./g;' | sed 's/^0// ; s/\.0/./g'`; do
 
-		list_of_files_to_remove="$list_of_files_to_remove $deleteFile"
-	done
+				list_of_files_to_remove="$list_of_files_to_remove $deleteFile"
+			done
 	
+		else 
+			sorted_file=$( ls -r ${PREFIX}* | grep -v 'pending' | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./; s/\.\([0-9]\+-\)/.0\1/g; s/\.\([0-9]\)\./.0\1./g;' | sort -r | sed 's/^0// ; s/\.0/./g' | head -1 )
+			for deleteFile in `ls -r ${PREFIX}* | grep -v 'pending' | grep -v "${sorted_file}" | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./; s/\.\([0-9]\+-\)/.0\1/g; s/\.\([0-9]\)\./.0\1./g;' | sed 's/^0// ; s/\.0/./g'`; do
+				list_of_files_to_remove="$list_of_files_to_remove $deleteFile"
+			done
+		fi
+
 	else 
-	sorted_file=$( ls -r ${PREFIX}* | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./; s/\.\([0-9]\+-\)/.0\1/g; s/\.\([0-9]\)\./.0\1./g;' | sort -r | sed 's/^0// ; s/\.0/./g' | head -1 )
-	for deleteFile in `ls -r ${PREFIX}* | grep -v "${sorted_file}" | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./; s/\.\([0-9]\+-\)/.0\1/g; s/\.\([0-9]\)\./.0\1./g;'`; do
-		list_of_files_to_remove="$list_of_files_to_remove $deleteFile"
-	done
+
+		sorted_file=$( ls -r ${PREFIX}* )
+
 	fi
 
 else 
 
-sorted_file=$( ls -r ${PREFIX}* )
+	if echo $PREFIX | grep -q 'geoapi'; then
+
+	pending_count=$( ls -r geoapi* | wc -l )
+	
+		if [ "$pending_count" == 1 ]; then
+	
+		sorted_file=$(ls -r ${PREFIX}*)	
+
+		else
+
+		sorted_file=$(ls -r ${PREFIX}* | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./; s/\.\([0-9]\+-\)/.0\1/g; s/\.\([0-9]\)\./.0\1./g;' | sort -r | sed 's/^0// ; s/\.0/./g' | head -1)
+		for deleteFile in `ls -r ${PREFIX}* | grep -v "${sorted_file}" | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./; s/\.\([0-9]\+-\)/.0\1/g; s/\.\([0-9]\)\./.0\1./g;' | sed 's/^0// ; s/\.0/./g'`; do
+		list_of_files_to_remove="$list_of_files_to_remove $deleteFile"
+		done
+			
+		fi
+	else	
+
+		prefix2=$( echo ${PREFIX} | sed 's/-pending//g' )
+
+		pending_count=$( ls -r ${prefix2}* | wc -l )
+	
+		if [ "$pending_count" -eq "1" ]; then
+		sorted_file=$( ls -r ${PREFIX}* )	
+
+		else
+		deleteFile=$( ls -r ${PREFIX}* )
+		list_of_files_to_remove="$list_of_files_to_remove $deleteFile"
+		fi
+	fi
 
 fi
 
-echo ""
 done
+
 
 echo ""
 echo "######################################"
