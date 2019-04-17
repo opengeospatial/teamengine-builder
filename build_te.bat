@@ -162,7 +162,7 @@ if DEFINED dev (
 
 if DEFINED base_folder (
 
-	  if EXIST base_folder (
+	  if EXIST !base_folder! (
 		call :realpath !base_folder!
 		SET base_folder=!base_folder!
 		echo "[INFO] Building in a fresh base folder: " !base_folder!
