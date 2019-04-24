@@ -125,15 +125,16 @@ done
 
 #--------- Check pre-condtions for the java, git, maven, tomcat.
 
-
-if echo $(java -version 2>&1) | grep -q -v "java"; then
+check_java=$(java -version 2>&1)
+if [ -z "$check_java" ]; then
 	echo ""
 	echo "[ERROR] Java not found. Please install JAVA."
 	echo ""
 	exit 0
 fi
 
-if echo $(mvn -version 2>&1) | grep -q -v "maven"; then
+check_mvn=$(mvn -version 2>&1)
+if [ -z "$check_mvn" ]; then
 	echo ""
 	echo "[ERROR] Maven not found. Please install Maven."
 	echo ""
