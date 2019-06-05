@@ -5,92 +5,51 @@
 # it will advise to remove jersey-client-1.17.1.jar
 
 list_of_files_to_remove=""
-flag='false'
-suppress=""
-
-echo ""
-echo "Files to Delete"
-echo ""
-
-## Method to check the element with the array
-array_contains2 () { 
-    local array="$1[@]"
-    local seeking=$2
-    local in=1
-    for element in "${!array}"; do
-        if [[ $element != $seeking ]]; then
-            in=0
-	    suppress=${element} 	
-            break
-        fi
-    done
-    return $in
-}
-
-sort_file () {
-
-#now do a reverse sorted listing with the jar name and remove the older one
-# 
-#Get the latest version jar file 		
-#This command only works in ubuntu>> sorted_file=$(ls -r ${PREFIX}* | sort -t- -k2 -V -r | head -1)
-
-sorted_array=( $(ls -r ${PREFIX}* | grep -v "pending" | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./; s/\.\([0-9]\+-\)/.0\1/g; s/\.\([0-9]\)\./.0\1./g;' | sed 's/^\(.*\)-.*$/\1/') )
-
-
-
-## Call method to check the elements from the array
-array_contains2 "sorted_array" "${PREFIX}" && status="true" || status="false"
-statuss=$?
-
-if [ "$status" == "true" ]; then
-
-sorted_file=$(ls -r ${PREFIX}* | grep -v "pending" | grep -v "${suppress}" | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./; s/\.\([0-9]\+-\)/.0\1/g; s/\.\([0-9]\)\./.0\1./g;' | sort -r | sed 's/^0// ; s/\.0/./g' | head -1)
-
-else
-
-sorted_file=$(ls -r ${PREFIX}* | grep -v "pending" | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./; s/\.\([0-9]\+-\)/.0\1/g; s/\.\([0-9]\)\./.0\1./g;' | sort -r | sed 's/^0// ; s/\.0/./g' | head -1)
-
-fi
-
-echo $sorted_file
-}
-
-## echo "Possible repeated files:"
-
-
-## Check filename contains the string "pending"
-for FILE in `ls -r *.jar`; do 
-
-	if echo $FILE | grep -q "pending" | grep -v "geoapi" | grep -v "xml-apis";then
-		list_of_files_to_remove="$list_of_files_to_remove $FILE"
-
-		#rm -f $FILE		
-	fi
-   done  
-
-# for PREFIX in `ls *.jar| grep -v "pending" |sed 's/-[0-9\.a-zA-Z]*\.jar//g'|uniq`; do
 
 for PREFIX in `ls *.jar| sed 's/^\(.*\)-.*$/\1/'|uniq`; do 
 
- #echo "   Prefix:  " $PREFIX 
+prefix_file_count=$( ls -r ${PREFIX}* | wc -l )
 
-if echo $PREFIX | grep -q "geoapi"; then
-	
-	pending_count=$( ls -r ${PREFIX}* | sed 's/pending-//g' | wc -l )
-	
-	if [ "$pending_count" == 1 ]; then
-	
-	sorted_file=$(ls -r ${PREFIX}*)	
+if echo "$PREFIX" | grep -vq -E 'geoapi.|*pending'; then
 
-	else
+	if [ "$prefix_file_count" -gt "1" ]; then
+	sorted_file=""
+		for FILE in `ls -r ${PREFIX}* | grep -v 'pending' | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./; s/\.\([0-9]\+-\)/.0\1/g; s/\.\([0-9]\)\./.0\1./g;'`; do
+			file_prefix=$( echo ${FILE} | sed 's/^\(.*\)-.*$/\1/' )
+			skip_file=""
+			if [[ ${PREFIX} != ${file_prefix} ]]; then
+				    skip_file=${FILE}
+				    break
+			fi
+		done
 
-	sorted_file=$(ls -r ${PREFIX}* | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./; s/\.\([0-9]\+-\)/.0\1/g; s/\.\([0-9]\)\./.0\1./g;' | sort -r | sed 's/^0// ; s/\.0/./g' | head -1)
-			
+		if [[ -n "$skip_file" ]]; then
+		
+			sorted_file=$( ls -r ${PREFIX}* | grep -v 'pending' | grep -v "${skip_file}" | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./; s/\.\([0-9]\+-\)/.0\1/g; s/\.\([0-9]\)\./.0\1./g;' | sort -r | sed 's/^0// ; s/\.0/./g' | head -1 )
+		
+			for deleteFile in `ls -r ${PREFIX}* | grep -v 'pending' | grep -v "${sorted_file}" | grep -v "${skip_file}" | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./; s/\.\([0-9]\+-\)/.0\1/g; s/\.\([0-9]\)\./.0\1./g;' | sed 's/^0// ; s/\.0/./g'`; do
+
+				list_of_files_to_remove="$list_of_files_to_remove $deleteFile"
+			done
+	
+		else 
+			sorted_file=$( ls -r ${PREFIX}* | grep -v 'pending' | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./; s/\.\([0-9]\+-\)/.0\1/g; s/\.\([0-9]\)\./.0\1./g;' | sort -r | sed 's/^0// ; s/\.0/./g' | head -1 )
+			for deleteFile in `ls -r ${PREFIX}* | grep -v 'pending' | grep -v "${sorted_file}" | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./; s/\.\([0-9]\+-\)/.0\1/g; s/\.\([0-9]\)\./.0\1./g;' | sed 's/^0// ; s/\.0/./g'`; do
+				list_of_files_to_remove="$list_of_files_to_remove $deleteFile"
+			done
+		fi
+
+	else 
+
+		sorted_file=$( ls -r ${PREFIX}* )
+
 	fi
-else
-	if echo $PREFIX | grep -q "xml-apis"; then
 
-	pending_count=$( ls -r ${PREFIX}* | sed 's/pending-//g' | wc -l )
+else 
+
+	if echo $PREFIX | grep -q 'geoapi'; then
+
+	pending_count=$( ls -r geoapi* | wc -l )
 	
 		if [ "$pending_count" == 1 ]; then
 	
@@ -99,38 +58,33 @@ else
 		else
 
 		sorted_file=$(ls -r ${PREFIX}* | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./; s/\.\([0-9]\+-\)/.0\1/g; s/\.\([0-9]\)\./.0\1./g;' | sort -r | sed 's/^0// ; s/\.0/./g' | head -1)
+		for deleteFile in `ls -r ${PREFIX}* | grep -v "${sorted_file}" | sed 's/^[0-9]\./0&/; s/\.\([0-9]\)$/.0\1/; s/\.\([0-9]\)\./.0\1./; s/\.\([0-9]\+-\)/.0\1/g; s/\.\([0-9]\)\./.0\1./g;' | sed 's/^0// ; s/\.0/./g'`; do
+		list_of_files_to_remove="$list_of_files_to_remove $deleteFile"
+		done
 			
 		fi
 	else	
-		##-----Call method 'sort_file'-----##
-		sorted_file=$( sort_file )		
+
+		prefix2=$( echo ${PREFIX} | sed 's/-pending//g' )
+
+		pending_count=$( ls -r ${prefix2}* | wc -l )
+	
+		if [ "$pending_count" -eq "1" ]; then
+		sorted_file=$( ls -r ${PREFIX}* )	
+
+		else
+		deleteFile=$( ls -r ${PREFIX}* )
+		list_of_files_to_remove="$list_of_files_to_remove $deleteFile"
+		fi
 	fi
+
 fi
-
-#list the files with PREFIX	
-
-  for FILE in `( ls -r ${PREFIX}* | grep -v "${suppress}" ) || ( ls -r ${PREFIX}* )` ; do 
-
-	#Delete the older version files	
-	if [ "$sorted_file" != "$FILE" ] && echo $FILE | grep -qv "pending";
-	then
-		#echo " "$FILE
-		#rm -f $FILE
-		list_of_files_to_remove="$list_of_files_to_remove $FILE"
-	fi
-
-    flag= "true"
-   done 
 
 done
 
-if [ "$flag"="true" ]; then
-	echo "issue the following command to remove jars with old versions"
-	echo "sudo rm -r $list_of_files_to_remove" 
-	echo ""
-else
-	echo "No repeated jars were found."
-fi
 
-
-
+echo ""
+echo "######################################"
+echo ""
+echo "rm -rf $list_of_files_to_remove"
+echo ""
