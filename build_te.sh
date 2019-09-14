@@ -340,7 +340,7 @@ if [ ! $dev ] ; then
  
   git checkout $te_tag 
   
-  echo "[INFO] Building using Maven in quite mode (1-2 min)"
+  echo "[INFO] Building using Maven in quiet mode (1-2 min)"
   mvn -q clean install -DskipTests=true
   
 
