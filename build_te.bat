@@ -317,7 +317,7 @@ echo "[INFO] Using Base folder: !base_folder!"
  
 		git checkout !te_tag!
   
-		echo "[INFO] Building using Maven in quite mode (1-2 min)"
+		echo "[INFO] Building using Maven in quiet mode (1-2 min)"
 		call mvn -q clean install -DskipTests=true
 		
 	) else (
@@ -336,7 +336,7 @@ echo "[INFO] Using Base folder: !base_folder!"
 				xcopy !dev! "!folder_to_build!\teamengine" /s /h /q
 				cd /d !folder_to_build!\teamengine
 				
-				echo "[INFO] Building using Maven in quite mode (1-2 min)"
+				echo "[INFO] Building using Maven in quiet mode (1-2 min)"
 				call mvn -q clean install -DskipTests=true
 		
 			) else (
