@@ -24,7 +24,7 @@ https://github.com/opengeospatial/ets-wfs10.git,1.13
 https://github.com/opengeospatial/ets-wfs11.git,1.33
 https://github.com/opengeospatial/ets-wfs20.git,1.36
 https://github.com/opengeospatial/ets-wms11.git,1.20
-https://github.com/opengeospatial/ets-wms13.git,1.27
+https://github.com/opengeospatial/ets-wms13.git,1.28
 https://github.com/opengeospatial/ets-wms-client13.git,1.5
 https://github.com/opengeospatial/ets-wmts10.git,1.4
 https://github.com/opengeospatial/ets-wps10.git,0.8
@@ -42,4 +42,5 @@ https://github.com/opengeospatial/ets-cat20-dgiwg10.git,0.3
 https://github.com/opengeospatial/ets-cdb10.git,1.0
 https://github.com/opengeospatial/ets-geotiff11.git,1.0
 https://github.com/opengeospatial/ets-security-client10.git,0.6
+https://github.com/opengeospatial/ets-ogcapi-edr10.git,0.1
 
