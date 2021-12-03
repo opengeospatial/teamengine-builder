@@ -84,7 +84,7 @@ list_of_files_to_remove=""
 list_of_files_to_skip=""
 list_of_files_to_keep=""
 
-PREFIXES=$(ls -1 *.jar |sed  "s/$patternVersion//g" | uniq )
+PREFIXES=$(ls -1 -I "ets-*" |sed  "s/$patternVersion//g" | uniq )
 
 for PREFIX in ${PREFIXES} ; do
 
