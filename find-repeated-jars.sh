@@ -4,10 +4,13 @@
 # For example: if a directory contains jersey-client-1.18.1.jar jersey-client-1.17.1.jar
 # it will advise to remove jersey-client-1.17.1.jar
 
-# pass the --remove option to remove the files'
+# pass the --remove option to remove the files
 
-# could have used dpkg --compare-versions 4.5.3  gt 4.5  && echo true || echo false
+###
+### A Few Functions
+###
 
+#
 # Pad version numbers for comparision i.e. te-2.7.2.jar to te-2.07.02.jar
 #
 pad_numbers() {
@@ -61,6 +64,10 @@ usage() {
 		echo "  --remove : Remove the jars"
 		echo
 }
+
+###
+### Main
+###
 
 # TODO better option handling
 if [ "$#" -gt 0 ] ; then
